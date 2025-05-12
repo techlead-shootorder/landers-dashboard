@@ -39,7 +39,7 @@ export default function AuthForm() {
       {/* Right side - Auth form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <h1 className="text-4xl font-bold mb-8 text-center">
+          <h1 className="text-4xl font-bold mb-8 text-center text-primary">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h1>
 
