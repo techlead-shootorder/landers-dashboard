@@ -1,6 +1,8 @@
 "use client"
 import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 // AuthForm component that can toggle between Login and Signup modes
 export default function AuthForm() {
@@ -9,6 +11,9 @@ export default function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const { isLoggedIn, setIsLoggedIn, loading, setAuth } = useAuth();
+
+  const router = useRouter();
 
   const toggleView = () => {
     setIsLogin(!isLogin);
@@ -18,28 +23,67 @@ export default function AuthForm() {
     setName('');
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would add your authentication logic
-    console.log(isLogin ? 'Logging in' : 'Signing up', { email, password, name });
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("email", email);
+  console.log("passowrd", password);
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    console.log("data", data);
+    // return;
+
+    if (!response.ok) {
+      console.error('Login failed:', data.error);
+      alert(data.error);
+      return;
+    }
+
+    // Combine user and token into one object
+    const authData = data.loginData;
+    
+    // console.log("authData", authData);
+
+    // Store in localStorage under a single key
+    localStorage.setItem('auth', JSON.stringify(authData));
+    setIsLoggedIn(true);
+
+    // console.log('Login successful:', authData);
+    // You can redirect or update state here
+    router.push('/');
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+    alert('Something went wrong. Please try again.');
+  }
+};
+
+
 
   return (
     <div className="flex min-h-screen">
       {/* Left side - Blue gradient background with logo */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-red-200 to bg-primary justify-center items-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-b from-red-300 to-red-500 justify-center items-center">
         <div className="text-center">
           <div className="text-6xl font-bold mb-2 text-white flex items-center justify-center">
-            L<span className="bg-white text-blue-500 rounded-full w-12 h-12 flex items-center justify-center">@</span>nders
+            L<span className="bg-white text-red-500 rounded-full w-12 h-12 flex items-center justify-center">@</span>nders
           </div>
-          <p className="text-white text-lg">Bold ideas. Real impact.</p>
+          {/* <p className="text-white text-lg">Bold ideas. Real impact.</p> */}
         </div>
       </div>
 
       {/* Right side - Auth form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <h1 className="text-4xl font-bold mb-8 text-center text-primary">
+          <h1 className="text-4xl font-bold mb-8 text-center text-red-500">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h1>
 
@@ -105,7 +149,7 @@ export default function AuthForm() {
             {/* Login/Signup button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md font-medium transition duration-300"
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-md font-medium transition duration-300 cursor-pointer"
             >
               {isLogin ? 'Log In' : 'Sign Up'}
             </button>
@@ -118,7 +162,7 @@ export default function AuthForm() {
             </p>
             <button
               type="button"
-              className="flex items-center justify-center mx-auto w-12 h-12 rounded-full border border-gray-300 hover:bg-gray-50 transition"
+              className="cursor-pointer flex items-center justify-center mx-auto w-12 h-12 rounded-full border border-gray-300 hover:bg-gray-50 transition"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +198,7 @@ export default function AuthForm() {
               <button
                 type="button"
                 onClick={toggleView}
-                className="text-blue-500 hover:text-blue-600 font-medium"
+                className="cursor-pointer text-blue-500 hover:text-blue-600 font-medium"
               >
                 {isLogin ? 'Sign up' : 'Log in'}
               </button>
@@ -162,7 +206,7 @@ export default function AuthForm() {
             {isLogin && (
               <button
                 type="button"
-                className="text-blue-500 hover:text-blue-600 text-sm mt-2"
+                className="hover:underline cursor-pointer text-blue-500 hover:text-blue-600 text-sm mt-2"
               >
                 Forgot password?
               </button>

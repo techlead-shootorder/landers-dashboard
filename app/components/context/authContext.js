@@ -8,7 +8,7 @@ const AuthContext = createContext();
 // Provide the context
 export const AuthProvider = ({ children }) => {
 
-    let isUserLoggedIn = localStorage.getItem('userCredential') ? true : false;
+    let isUserLoggedIn = localStorage.getItem('auth') ? true : false;
     const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
 
     const router = useRouter();
