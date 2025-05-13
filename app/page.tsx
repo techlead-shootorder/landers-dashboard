@@ -10,35 +10,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext'; // adjust the path as needed
 import { useRouter } from 'next/navigation';
-
-// Define content components for different sections
-const PagesContent = () => (
-  <div className="p-4">
-    <h2 className="text-2xl font-bold mb-4">Pages</h2>
-    <p>Here you can manage your pages content.</p>
-  </div>
-);
-
-const LeadsContent = () => (
-  <div className="p-4">
-    <h2 className="text-2xl font-bold mb-4">Leads</h2>
-    <p>View and manage your leads here.</p>
-  </div>
-);
-
-const AnalyticsContent = () => (
-  <div className="p-4">
-    <h2 className="text-2xl font-bold mb-4">Analytics</h2>
-    <p>Explore your analytics dashboard.</p>
-  </div>
-);
-
+import PagesContent from './components/dashboard/Pages/PagesContent';
+import AnalyticsContent from './components/dashboard/Analytics/AnalyticsContent';
+import LeadsContent from './components/dashboard/Leads/LeadsContent';
+ 
 export default function Home() {
   const { isLoggedIn, loading, setAuth, setIsLoggedIn } = useAuth();
-  const [users, setUsers] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeContent, setActiveContent] = useState('pages');
   const router = useRouter();
+  const [landingPageData, setLandingPageData] = useState([]);
+  const [searchData, setSearchData] = useState([]);
 
   // Logout handler
   const handleLogout = () => {
@@ -55,6 +37,26 @@ export default function Home() {
     }
   }, [loading, isLoggedIn, router]);
 
+  // Fetch Landing Pages
+   const fetchLandingPageData = async (userId) => {
+    console.log("user id", userId)
+      try {
+        const res = await fetch('/api/allLandingPages');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        const filterLandingPages = data.data.filter((item) => item.user_created == userId);
+        setLandingPageData(filterLandingPages);
+        setSearchData(filterLandingPages);
+
+        // console.log("landing page data", data);
+         
+        // setLandingPageData(data);
+      } catch (err) {
+        alert('Failed to Fetch Landing Page Data:', err);
+        // console.error(err);
+      }
+    };
+
   // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
@@ -64,10 +66,18 @@ export default function Home() {
           throw new Error('Failed to fetch users');
         }
         const data = await res.json();
-        console.log("user data", data);
-        setUsers(data);
+        const loginData = JSON.parse(localStorage.getItem('auth'));
+        const filterData = data.data.filter((item)=> item?.email == loginData?.email);
+         
+        if(filterData?.length > 0){
+          fetchLandingPageData(filterData[0]?.id);
+
+        }
+
+        // console.log("user data", data);
+       
       } catch (err) {
-        console.error('Error fetching users:', err);
+        alert('Error fetching users:', err);
         // Optionally handle error (e.g., show error message to user)
       }
     };
@@ -84,7 +94,7 @@ export default function Home() {
   const renderContent = () => {
     switch (activeContent) {
       case 'pages':
-        return <PagesContent />;
+        return <PagesContent landingPageData={landingPageData} setLandingPageData={setLandingPageData} searchData={searchData} setSearchData={setSearchData}  />;
       case 'leads':
         return <LeadsContent />;
       case 'analytics':
@@ -121,9 +131,10 @@ export default function Home() {
             className={`
               w-full flex items-center justify-center 
               border-2 border-dashed border-gray-300 
-              p-3 rounded-lg mb-8 
+              p-3 rounded-lg mb-8 cursor-pointer
               hover:border-blue-500 transition
             `}
+            onClick={() => router.push('/create-page')}
           >
             <PlusIcon className="mr-2" />
             {!isSidebarCollapsed && <span>Create Page</span>}
@@ -158,7 +169,7 @@ export default function Home() {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center p-3 rounded-lg hover:bg-red-50"
+          className="w-full flex items-center p-3 rounded-lg bg-red-500 hover:bg-red-600 text-white"
         >
           <LogOutIcon className="mr-2" />
           {!isSidebarCollapsed && <span>Logout</span>}

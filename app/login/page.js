@@ -50,13 +50,14 @@ const handleSubmit = async (e) => {
 
     // Combine user and token into one object
     const authData = data.loginData;
+
+    const userData = {...authData, email}
     
     // console.log("authData", authData);
 
     // Store in localStorage under a single key
-    localStorage.setItem('auth', JSON.stringify(authData));
+    localStorage.setItem('auth', JSON.stringify(userData));
     setIsLoggedIn(true);
-
     // console.log('Login successful:', authData);
     // You can redirect or update state here
     router.push('/');
