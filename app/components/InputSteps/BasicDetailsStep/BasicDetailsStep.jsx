@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from "react";
+import { InfoIcon } from "lucide-react";
 
 const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
-  // Local state for form handling
+  // Local state for form handling - KEEPING ORIGINAL FORM DATA STRUCTURE
   const [localFormData, setLocalFormData] = useState({
+    name: formData.name || "",
     companyName: formData.companyName || "",
-    funnelName: formData.funnelName || "",
     domain: formData.domain || "",
-    phone: formData.phone || "",
-    whatsapp: formData.whatsapp || "",
+    slug: formData.slug || "",
     email: formData.email || "",
+    phone: formData.phone || "",
+    address: formData.address || "",
+    whatsapp: formData.whatsapp || "",
   });
 
   // Handle input changes
@@ -31,25 +34,46 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      {/* Step Title */}
-      <div className="mb-6 pb-4 border-b">
-        <h2 className="text-xl font-semibold text-gray-800">Basic Details</h2>
-      </div>
+    <div className="flex flex-col h-[88vh]">
+      {/* Left sidebar for title and tooltip */}
+      <div className="flex flex-1">
+        <div className="relative w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
+          <div className="flex items-center h-full">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              Laying the First Brick of Your Funnel
+            </h1>
+          </div>
+          
+          <div className="absolute bottom-4 flex items-start mb-8">
+            <InfoIcon className="w-6 h-6 mr-2 text-gray-500 flex-shrink-0" />
+            <p className="text-sm text-gray-600">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac orci condimentum, viverra elit vel, gravida lorem. Fusce vel diam nec magna facilisis malesuada
+            </p>
+          </div>
+        </div>
 
-      {/* Tip Banner */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
-        <p className="text-blue-700">
-          Tip: Filling out these details accurately will help create a more effective landing page for your business.
-        </p>
-      </div>
-
-      {/* Form Fields */}
-      <div className="space-y-8">
-        {/* Basic Group */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-700">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Main content area */}
+        <div className="w-2/3 bg-white p-12">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-8">Details</h2>
+          
+          <div className="grid grid-cols-2 gap-6">
+            {/* Name field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={localFormData.name}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Name"
+              />
+            </div>
+            
+            {/* Company Name field */}
             <div>
               <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
                 Company Name
@@ -60,77 +84,44 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="companyName"
                 value={localFormData.companyName}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Comapany"
               />
             </div>
+            
+            {/* Domain field */}
             <div>
-              <label htmlFor="funnelName" className="block text-sm font-medium text-gray-700 mb-1">
-                Funnel Name
+              <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
+                Domain
               </label>
-              <input
-                type="text"
-                id="funnelName"
-                name="funnelName"
-                value={localFormData.funnelName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
-              Domain
-            </label>
-            <div className="flex items-center">
-              <span className="inline-flex items-center px-3 py-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                https://
-              </span>
               <input
                 type="text"
                 id="domain"
                 name="domain"
                 value={localFormData.domain}
                 onChange={handleInputChange}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-r-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="yourdomain.com"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Domain"
               />
             </div>
-            <p className="mt-1 text-sm text-gray-500">
-              (Slug will be created automatically if funnel name is entered)
-            </p>
-          </div>
-        </div>
-
-        {/* Contact Group */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-700">Contact Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Slug field */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
+              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+                Slug
               </label>
               <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={localFormData.phone}
+                type="text"
+                id="slug"
+                name="slug"
+                value={localFormData.slug}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Slug"
               />
             </div>
-            <div>
-              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
-                WhatsApp
-              </label>
-              <input
-                type="tel"
-                id="whatsapp"
-                name="whatsapp"
-                value={localFormData.whatsapp}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            
+            {/* Email field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -141,24 +132,76 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="email"
                 value={localFormData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="email"
+              />
+            </div>
+            
+            {/* Phone field */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={localFormData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Phone"
+              />
+            </div>
+            
+            {/* Address field */}
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={localFormData.address}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Address"
+              />
+            </div>
+            
+            {/* WhatsApp field */}
+            <div>
+              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
+                WhatsApp
+              </label>
+              <input
+                type="tel"
+                id="whatsapp"
+                name="whatsapp"
+                value={localFormData.whatsapp}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Whatsapp"
               />
             </div>
           </div>
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6">
-          <div>
-            {/* No Prev button on first step */}
+          
+          {/* Navigation Buttons */}
+          <div className="flex justify-end mt-12 space-x-4">
+            <button
+              type="button"
+              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+            >
+              Next
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleNext}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-          >
-            Next
-          </button>
         </div>
       </div>
     </div>
