@@ -108,24 +108,23 @@ const CreatePage = () => {
             goToNextStep={goToNextStep}
           />
         );
-      case 2:
+         case 2:
+        return(
+          <ChooseTemplateStep 
+             formData={formData}
+             updateFormData={updateFormData}
+             goToNextStep={goToNextStep}
+             goToPrevStep={goToPrevStep}
+
+          />
+        );
+      case 3:
         return (
           <HeroSectionStep
             formData={formData}
             updateFormData={updateFormData}
             goToNextStep={goToNextStep} 
             goToPrevStep={goToPrevStep}
-          />
-        );
-      
-        case 3:
-        return(
-          <HeroForm 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
-
           />
         );
          case 4:
@@ -168,6 +167,7 @@ const CreatePage = () => {
 
           />
         );
+        
       
       // Add cases for other steps as you create them
       default:

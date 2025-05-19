@@ -106,7 +106,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
             </div>
             
             {/* Slug field */}
-            <div>
+            {/* <div>
               <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
                 Slug
               </label>
@@ -119,7 +119,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Slug"
               />
-            </div>
+            </div> */}
             
             {/* Email field */}
             <div>
@@ -154,7 +154,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
             </div>
             
             {/* Address field */}
-            <div>
+            {/* <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
                 Address
               </label>
@@ -167,7 +167,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Address"
               />
-            </div>
+            </div> */}
             
             {/* WhatsApp field */}
             <div>

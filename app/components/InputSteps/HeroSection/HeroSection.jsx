@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { InfoIcon, X } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
+import FieldCreationModal from './components/FieldCreationComponents'; // Adjust the path as needed
 
 const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   // Local state for form handling
@@ -20,7 +21,29 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     logo: formData.logo || null,
     banner: formData.banner || null,
     mobileBanner: formData.mobileBanner || null,
+    // Form Section states
+    formHeading: formData.formHeading || "",
+    formSubHeading: formData.formSubHeading || "",
+    thankYouHeading: formData.thankYouHeading || "",
+    thankYouDescription: formData.thankYouDescription || "",
+    formType: formData.formType || "default",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formFields, setFormFields] = useState([]);
+
+  // Add these handlers to your component
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSaveField = (fieldData) => {
+    setFormFields([...formFields, fieldData]);
+    setIsModalOpen(false);
+  };
 
   // Refs for file inputs
   const faviconInputRef = useRef(null);
@@ -45,6 +68,16 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
   };
 
+  // Handle radio changes
+  const handleRadioChange = (e) => {
+    const { name, value } = e.target;
+    setLocalFormData({
+      ...localFormData,
+      [name]: value,
+    });
+  };
+
+
   // Handle range input changes
   const handleRangeChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +96,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
         ...localFormData,
         [fieldName]: file,
       });
-      
+
       // Create and store preview URL
       const previewUrl = URL.createObjectURL(file);
       setPreviews({
@@ -79,19 +112,19 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     if (previews[fieldName]) {
       URL.revokeObjectURL(previews[fieldName]);
     }
-    
+
     // Reset the file input
     if (fieldName === 'favicon') faviconInputRef.current.value = null;
     if (fieldName === 'logo') logoInputRef.current.value = null;
     if (fieldName === 'banner') bannerInputRef.current.value = null;
     if (fieldName === 'mobileBanner') mobileBannerInputRef.current.value = null;
-    
+
     // Update states
     setLocalFormData({
       ...localFormData,
       [fieldName]: null,
     });
-    
+
     setPreviews({
       ...previews,
       [fieldName]: null,
@@ -127,7 +160,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
               Laying the First Brick of Your Funnel
             </h1>
           </div>
-          
+
           <div className="absolute bottom-4 flex items-start mb-8">
             <InfoIcon className="w-6 h-6 mr-2 text-gray-500 flex-shrink-0" />
             <p className="text-sm text-gray-600">
@@ -139,7 +172,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
         {/* Main content area */}
         <div className="w-2/3 bg-white p-12 overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Hero Section</h2>
-          
+
           <div className="grid grid-cols-2 gap-6">
             {/* Heading field */}
             <div>
@@ -156,7 +189,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 placeholder="Catchy main headline"
               />
             </div>
-            
+
             {/* Sub Heading field */}
             <div>
               <label htmlFor="subHeading" className="block text-sm font-medium text-gray-700 mb-1">
@@ -172,7 +205,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 placeholder="Supportive subtext here"
               />
             </div>
-            
+
             {/* Logo Link field */}
             <div>
               <label htmlFor="logoLink" className="block text-sm font-medium text-gray-700 mb-1">
@@ -188,7 +221,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 placeholder="Paste home page URL"
               />
             </div>
-            
+
             {/* Bar Offer field */}
             <div>
               <label htmlFor="barOffer" className="block text-sm font-medium text-gray-700 mb-1">
@@ -204,7 +237,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 placeholder="Short offer"
               />
             </div>
-            
+
             {/* Rating Profile Link field */}
             <div>
               <label htmlFor="ratingProfileLink" className="block text-sm font-medium text-gray-700 mb-1">
@@ -220,9 +253,29 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 placeholder="Add rating link"
               />
             </div>
-            
-            {/* Theme Color field */}
+
+            {/* Rating Site dropdown */}
             <div>
+              <label htmlFor="ratingSite" className="block text-sm font-medium text-gray-700 mb-1">
+                Rating Site
+              </label>
+              <select
+                id="ratingSite"
+                name="ratingSite"
+                value={localFormData.ratingSite}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                {ratingSiteOptions.map((site) => (
+                  <option key={site} value={site}>
+                    {site}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Theme Color field */}
+            {/* <div>
               <label htmlFor="themeColor" className="block text-sm font-medium text-gray-700 mb-1">
                 Theme color
               </label>
@@ -243,9 +296,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   className="ml-2 flex-1 px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-            </div>
+            </div> */}
           </div>
-          
+
           {/* Range inputs */}
           <div className="mt-8 grid grid-cols-2 gap-6">
             {/* Background Opacity slider */}
@@ -285,40 +338,174 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             </div>
           </div>
 
-          {/* Rating Site dropdown */}
-          <div className="mt-6">
-            <label htmlFor="ratingSite" className="block text-sm font-medium text-gray-700 mb-1">
-              Rating Site
-            </label>
-            <select
-              id="ratingSite"
-              name="ratingSite"
-              value={localFormData.ratingSite}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              {ratingSiteOptions.map((site) => (
-                <option key={site} value={site}>
-                  {site}
-                </option>
-              ))}
-            </select>
+          {/* HERO FORM SECTION */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-semibold text-gray-800">Hero Form</h2>
+              {/* <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+              <span className="text-sm font-medium text-blue-600">2/10</span>
+              <div className="ml-2 w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+            </div> */}
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+
+              {/*Grid 1  */}
+              <div className="flex flex-col gap-6">
+
+                {/* Form Type radio group */}
+                <div className="col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Form Type
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="formType"
+                        value="default"
+                        checked={localFormData.formType === "default"}
+                        onChange={handleRadioChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Default</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="formType"
+                        value="custom"
+                        checked={localFormData.formType === "custom"}
+                        onChange={handleRadioChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Custom</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Form Heading field */}
+                <div>
+                  <label htmlFor="formHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                    Form Heading
+                  </label>
+                  <input
+                    type="text"
+                    id="formHeading"
+                    name="formHeading"
+                    value={localFormData.formHeading}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Eledent - Dental Implants Offer"
+                  />
+                </div>
+
+                {/* Form Sub Heading field */}
+                <div>
+                  <label htmlFor="formSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                    Form Sub Heading
+                  </label>
+                  <input
+                    type="text"
+                    id="formSubHeading"
+                    name="formSubHeading"
+                    value={localFormData.formSubHeading}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="enquiry.eledenthospitals.com"
+                  />
+                </div>
+
+                {/* Thank you Heading field */}
+                <div>
+                  <label htmlFor="thankYouHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                    Thank you Heading
+                  </label>
+                  <input
+                    type="text"
+                    id="thankYouHeading"
+                    name="thankYouHeading"
+                    value={localFormData.thankYouHeading}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="dental-implants-offers"
+                  />
+                </div>
+
+                {/* Thank you Description field */}
+                <div className="col-span-1">
+                  <label htmlFor="thankYouDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                    Thank you Description
+                  </label>
+                  <input
+                    type="text"
+                    id="thankYouDescription"
+                    name="thankYouDescription"
+                    value={localFormData.thankYouDescription}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="enquiry.eledenthospitals.com"
+                  />
+                </div>
+
+              </div>
+
+              {/* Grid 2 Create Fields */}
+              <div>
+                <div>
+                  <button
+                    onClick={handleOpenModal}
+                    className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-md transition-colors duration-200"
+                  >
+                    Create Field
+                  </button>
+
+                  {/* Display the fields that have been created */}
+                  {formFields.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">Created Fields</h3>
+                      <div className="space-y-2">
+                        {formFields.map((field, index) => (
+                          <div key={index} className="p-2 bg-gray-100 rounded border border-gray-300">
+                            <p className="font-medium">{field.inputLabel}</p>
+                            <p className="text-xs text-gray-500">Type: {field.type}, Input Type: {field.inputType}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add the modal component */}
+                  <FieldCreationModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    onSave={handleSaveField}
+                  />
+                </div>
+              </div>
+
+
+
+
+            </div>
           </div>
+
+
 
           {/* Image upload section */}
           <div className="mt-10 grid grid-cols-4 gap-4">
             {/* Favicon upload */}
-            <div>
+            {/* <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Favicon</p>
               <div className="flex flex-col">
                 {previews.favicon ? (
                   <div className="relative mb-2">
-                    <img 
-                      src={previews.favicon} 
-                      alt="Favicon preview" 
+                    <img
+                      src={previews.favicon}
+                      alt="Favicon preview"
                       className="w-32 h-32 object-contain border rounded"
                     />
-                    <button 
+                    <button
                       onClick={() => handleRemoveImage('favicon')}
                       className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                     >
@@ -326,16 +513,16 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     </button>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => faviconInputRef.current.click()}
                     className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
                   >
-                    <LuUpload className="font-bold"/>
+                    <LuUpload className="font-bold" />
                     Upload Document
                   </button>
                 )}
-                <input 
+                <input
                   type="file"
                   ref={faviconInputRef}
                   className="hidden"
@@ -343,20 +530,20 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   onChange={(e) => handleFileUpload(e, 'favicon')}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Logo upload */}
-            <div>
+            {/* <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Logo</p>
               <div className="flex flex-col">
                 {previews.logo ? (
                   <div className="relative mb-2">
-                    <img 
-                      src={previews.logo} 
-                      alt="Logo preview" 
+                    <img
+                      src={previews.logo}
+                      alt="Logo preview"
                       className="w-32 h-32 object-contain border rounded"
                     />
-                    <button 
+                    <button
                       onClick={() => handleRemoveImage('logo')}
                       className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                     >
@@ -364,16 +551,16 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     </button>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => logoInputRef.current.click()}
                     className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
                   >
-                    <LuUpload className="font-bold"/>
+                    <LuUpload className="font-bold" />
                     Upload Document
                   </button>
                 )}
-                <input 
+                <input
                   type="file"
                   ref={logoInputRef}
                   className="hidden"
@@ -381,20 +568,20 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   onChange={(e) => handleFileUpload(e, 'logo')}
                 />
               </div>
-            </div>
-            
+            </div> */}
+
             {/* Banner upload */}
             <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Banner</p>
               <div className="flex flex-col">
                 {previews.banner ? (
                   <div className="relative mb-2">
-                    <img 
-                      src={previews.banner} 
-                      alt="Banner preview" 
+                    <img
+                      src={previews.banner}
+                      alt="Banner preview"
                       className="w-32 h-32 object-contain border rounded"
                     />
-                    <button 
+                    <button
                       onClick={() => handleRemoveImage('banner')}
                       className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                     >
@@ -402,16 +589,16 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     </button>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => bannerInputRef.current.click()}
                     className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
                   >
-                    <LuUpload className="font-bold"/>
+                    <LuUpload className="font-bold" />
                     Upload Document
                   </button>
                 )}
-                <input 
+                <input
                   type="file"
                   ref={bannerInputRef}
                   className="hidden"
@@ -420,19 +607,19 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 />
               </div>
             </div>
-            
+
             {/* Mobile Banner upload */}
             <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Mobile Banner</p>
               <div className="flex flex-col">
                 {previews.mobileBanner ? (
                   <div className="relative mb-2">
-                    <img 
-                      src={previews.mobileBanner} 
-                      alt="Mobile Banner preview" 
+                    <img
+                      src={previews.mobileBanner}
+                      alt="Mobile Banner preview"
                       className="w-32 h-32 object-contain border rounded"
                     />
-                    <button 
+                    <button
                       onClick={() => handleRemoveImage('mobileBanner')}
                       className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                     >
@@ -440,16 +627,16 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     </button>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => mobileBannerInputRef.current.click()}
                     className="flex items-center gap-2 text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 w-fit"
                   >
-                    <LuUpload className="font-bold"/>
+                    <LuUpload className="font-bold" />
                     Upload Document
                   </button>
                 )}
-                <input 
+                <input
                   type="file"
                   ref={mobileBannerInputRef}
                   className="hidden"
@@ -459,7 +646,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
               </div>
             </div>
           </div>
-          
+
           {/* Navigation Buttons */}
           <div className="flex justify-end mt-12 space-x-4">
             <button

@@ -86,13 +86,13 @@ const HeroForm = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
     <div className="flex flex-col h-[88vh]">
       {/* Left sidebar for title and tooltip */}
       <div className="flex flex-1">
-       <div className="relative w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
+        <div className="relative w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
           <div className="flex items-center h-full">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               Laying the First Brick of Your Funnel
             </h1>
           </div>
-          
+
           <div className="absolute bottom-4 flex items-start mb-8">
             <InfoIcon className="w-6 h-6 mr-2 text-gray-500 flex-shrink-0" />
             <p className="text-sm text-gray-600">
@@ -110,56 +110,83 @@ const HeroForm = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
               <div className="ml-2 w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
             </div> */}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-6">
-            {/* User Access Token field */}
-            <div>
-              <label htmlFor="userAccessToken" className="block text-sm font-medium text-gray-700 mb-1">
-                User Access Token
-              </label>
-              <input
-                type="text"
-                id="userAccessToken"
-                name="userAccessToken"
-                value={localFormData.userAccessToken}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Eledent - Dental Implants Offer"
-              />
+
+            {/*Grid 1  */}
+            <div className="flex flex-col gap-6">
+
+              {/* Form Type radio group */}
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Form Type
+                </label>
+                <div className="flex items-center space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="formType"
+                      value="default"
+                      checked={localFormData.formType === "default"}
+                      onChange={handleRadioChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Default</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="formType"
+                      value="custom"
+                      checked={localFormData.formType === "custom"}
+                      onChange={handleRadioChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Custom</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Form Heading field */}
+              <div>
+                <label htmlFor="formHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                  Form Heading
+                </label>
+                <input
+                  type="text"
+                  id="formHeading"
+                  name="formHeading"
+                  value={localFormData.formHeading}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Eledent - Dental Implants Offer"
+                />
+              </div>
+
+              {/* Form Sub Heading field */}
+              <div>
+                <label htmlFor="formSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                  Form Sub Heading
+                </label>
+                <input
+                  type="text"
+                  id="formSubHeading"
+                  name="formSubHeading"
+                  value={localFormData.formSubHeading}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="enquiry.eledenthospitals.com"
+                />
+              </div>
+              
+              {/* Create new button */}
+              <div>
+                <button className="bg-gray-300 p-2 rounded-2xl">Create Field</button>
+              </div>
             </div>
-            
-            {/* Form Heading field */}
-            <div>
-              <label htmlFor="formHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                Form Heading
-              </label>
-              <input
-                type="text"
-                id="formHeading"
-                name="formHeading"
-                value={localFormData.formHeading}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Eledent - Dental Implants Offer"
-              />
-            </div>
-            
-            {/* Form Sub Heading field */}
-            <div>
-              <label htmlFor="formSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                Form Sub Heading
-              </label>
-              <input
-                type="text"
-                id="formSubHeading"
-                name="formSubHeading"
-                value={localFormData.formSubHeading}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="enquiry.eledenthospitals.com"
-              />
-            </div>
-            
+
+           {/* Grid 2 */}
+           <div>
             {/* Thank you Heading field */}
             <div>
               <label htmlFor="thankYouHeading" className="block text-sm font-medium text-gray-700 mb-1">
@@ -175,7 +202,7 @@ const HeroForm = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 placeholder="dental-implants-offers"
               />
             </div>
-            
+
             {/* Thank you Description field */}
             <div className="col-span-1">
               <label htmlFor="thankYouDescription" className="block text-sm font-medium text-gray-700 mb-1">
@@ -191,117 +218,13 @@ const HeroForm = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 placeholder="enquiry.eledenthospitals.com"
               />
             </div>
+            </div>
+
+
+
             
-            {/* Form Type radio group */}
-            <div className="col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Form Type
-              </label>
-              <div className="flex items-center space-x-4">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="formType"
-                    value="default"
-                    checked={localFormData.formType === "default"}
-                    onChange={handleRadioChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Default</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="formType"
-                    value="custom"
-                    checked={localFormData.formType === "custom"}
-                    onChange={handleRadioChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Custom</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Custom fields checkboxes */}
-            <div className="col-span-2 mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Custom
-              </label>
-              <div className="flex space-x-6">
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="email"
-                    checked={localFormData.customFields.email}
-                    onChange={handleCustomFieldChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Email</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="phone"
-                    checked={localFormData.customFields.phone}
-                    onChange={handleCustomFieldChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Phone</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="location"
-                    checked={localFormData.customFields.location}
-                    onChange={handleCustomFieldChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Location</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Highlights */}
-            <div className="col-span-2 mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Highlights
-              </label>
-              <div className="flex space-x-6">
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="option1"
-                    checked={localFormData.highlights.option1}
-                    onChange={handleHighlightChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">$</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="option2"
-                    checked={localFormData.highlights.option2}
-                    onChange={handleHighlightChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">2500</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="option3"
-                    checked={localFormData.highlights.option3}
-                    onChange={handleHighlightChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">2222222</span>
-                </label>
-              </div>
-            </div>
           </div>
-          
+
           {/* Navigation Buttons */}
           <div className="flex justify-end mt-12 space-x-4">
             <button
