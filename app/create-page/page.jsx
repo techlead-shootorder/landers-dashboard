@@ -191,6 +191,7 @@ const CreatePage = () => {
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Header - Same across all steps */}
+      {/* testing */}
       {/* <header className="bg-white shadow-sm border-b sticky top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
