@@ -170,7 +170,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
         </div>
 
         {/* Main content area */}
-        <div className="w-2/3 bg-white p-12 overflow-y-auto">
+        <div className="w-2/3 bg-white p-12 overflow-y-auto relative">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Hero Section</h2>
 
           <div className="grid grid-cols-2 gap-6">
@@ -648,7 +648,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-end mt-12 space-x-4">
+          <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={handlePrevious}

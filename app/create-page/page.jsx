@@ -10,6 +10,9 @@ import AboutUs from "../components/InputSteps/AboutUs/AboutUs";
 import Services from "../components/InputSteps/Services/Services";
 import UspGroup from "../components/InputSteps/UspGroup/UspGroup";
 import TimelineStep from "../components/InputSteps/Timeline/TimelineStep";
+import TestimonialsCTA from "../components/InputSteps/Testimonials&CTA/TestimonialsCTA";
+import FaqAndInsta from "../components/InputSteps/FAQ&Insta/FaqAndInsta";
+import SeoAndLegal from "../components/InputSteps/SeoAndLegal/SeoAndLegal";
 // Import other step components as you create them
 // ...and so on
 
@@ -17,32 +20,32 @@ const CreatePage = () => {
   // Current step tracker
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 10;
-  
+
   // Animated progress state
   const [animatedProgress, setAnimatedProgress] = useState((1 / totalSteps) * 100);
   const animationRef = useRef(null);
-  
+
   // Consolidated form data for all steps
   const [formData, setFormData] = useState({
-  // Basic Details (Step 1)
-  companyName: "",
-  funnelName: "",
-  domain: "",
-  phone: "",
-  whatsapp: "",
-  email: "",
-  // Add fields for other steps as you create them
-});
+    // Basic Details (Step 1)
+    companyName: "",
+    funnelName: "",
+    domain: "",
+    phone: "",
+    whatsapp: "",
+    email: "",
+    // Add fields for other steps as you create them
+  });
 
   // Animation effect for smooth progress
   useEffect(() => {
     const targetProgress = (currentStep / totalSteps) * 100;
-    
+
     // Cancel any existing animation
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
-    
+
     // Animation function to gradually update progress
     const animateProgress = () => {
       setAnimatedProgress(prev => {
@@ -51,22 +54,22 @@ const CreatePage = () => {
           // If we're very close to target, just set it directly
           return targetProgress;
         }
-        
+
         // Otherwise move towards target with easing
         const newValue = prev + (targetProgress - prev) * 0.1;
-        
+
         // Continue animation if we haven't reached target
         if (Math.abs(newValue - targetProgress) > 0.1) {
           animationRef.current = requestAnimationFrame(animateProgress);
         }
-        
+
         return newValue;
       });
     };
-    
+
     // Start the animation
     animationRef.current = requestAnimationFrame(animateProgress);
-    
+
     // Cleanup on component unmount
     return () => {
       if (animationRef.current) {
@@ -108,13 +111,13 @@ const CreatePage = () => {
             goToNextStep={goToNextStep}
           />
         );
-         case 2:
-        return(
-          <ChooseTemplateStep 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
+      case 2:
+        return (
+          <ChooseTemplateStep
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
 
           />
         );
@@ -123,52 +126,62 @@ const CreatePage = () => {
           <HeroSectionStep
             formData={formData}
             updateFormData={updateFormData}
-            goToNextStep={goToNextStep} 
+            goToNextStep={goToNextStep}
             goToPrevStep={goToPrevStep}
           />
         );
-         case 4:
-        return(
-          <AboutUs 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
+      case 4:
+        return (
+          <AboutUs
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
 
           />
         );
-         case 5:
-        return(
-          <Services 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
+      case 5:
+        return (
+          <Services
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
 
           />
         );
-         case 6:
-        return(
-          <UspGroup 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
+      case 6:
+        return (
+          <TestimonialsCTA
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
 
           />
         );
-         case 7:
-        return(
-          <TimelineStep 
-             formData={formData}
-             updateFormData={updateFormData}
-             goToNextStep={goToNextStep}
-             goToPrevStep={goToPrevStep}
+      case 7:
+        return (
+          <FaqAndInsta
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
 
           />
         );
-        
-      
+      case 8:
+        return (
+          <SeoAndLegal
+            formData={formData}
+            updateFormData={updateFormData}
+            goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
+
+          />
+        );
+
+
       // Add cases for other steps as you create them
       default:
         return <div>Step {currentStep} not implemented yet</div>;

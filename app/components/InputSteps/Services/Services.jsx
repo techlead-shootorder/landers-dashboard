@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { InfoIcon, Trash } from "lucide-react";
 import ServiceCreationModal from "./component/ServiceCreationModal";
 import UspCreationModal from "./component/UspCreationModal";
@@ -10,24 +10,42 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   // Local state for form handling
   const [localFormData, setLocalFormData] = useState({
     // Services section
-    servicesHeading: formData.servicesHeading || "",
-    servicesSectionSubHeading: formData.servicesSectionSubHeading || "",
-    services: formData.services || [],
+    servicesHeading: "",
+    servicesSectionSubHeading: "",
+    services: [],
 
     // USP Group section
-    uspGroupHeading: formData.uspGroupHeading || "",
-    uspGroupSubHeading: formData.uspGroupSubHeading || "",
-    uspItems: formData.uspItems || [],
+    uspGroupHeading: "",
+    uspGroupSubHeading: "",
+    uspItems: [],
 
     // Featured Group section
-    featuredGroupHeading: formData.featuredGroupHeading || "",
-    featuredGroupSubHeading: formData.featuredGroupSubHeading || "",
-    featuredItems: formData.featuredItems || [],
-
-    // Floor Plan section (from original code)
-    floorPlanHeading: formData.floorPlanHeading || "",
-    floorPlanSummary: formData.floorPlanSummary || ""
+    featuredGroupHeading: "",
+    featuredGroupSubHeading: "",
+    featuredItems: [],
   });
+
+  // Initialize local form data from props
+  useEffect(() => {
+    if (formData) {
+      setLocalFormData({
+        // Services section
+        servicesHeading: formData.servicesHeading || "",
+        servicesSectionSubHeading: formData.servicesSectionSubHeading || "",
+        services: formData.services || [],
+
+        // USP Group section
+        uspGroupHeading: formData.uspGroupHeading || "",
+        uspGroupSubHeading: formData.uspGroupSubHeading || "",
+        uspItems: formData.uspItems || [],
+
+        // Featured Group section
+        featuredGroupHeading: formData.featuredGroupHeading || "",
+        featuredGroupSubHeading: formData.featuredGroupSubHeading || "",
+        featuredItems: formData.featuredItems || [],
+      });
+    }
+  }, [formData]);
 
   // States for modals
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
@@ -57,8 +75,7 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
     setServiceModalOpen(true);
   };
 
-
-  // Fixed SERVICE SAVE HANDLER
+  // SERVICE SAVE HANDLER
   const handleSaveService = (serviceData, isEditMode) => {
     if (isEditMode && editingService !== null && typeof editingService.index === 'number') {
       const updatedServices = [...localFormData.services];
@@ -74,10 +91,10 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
         services: updatedServices
       });
     }
-    handleCloseServiceModal(); // Add this line to close modal after saving
+    handleCloseServiceModal();
   };
 
-  // Fixed USP SAVE HANDLER
+  // USP SAVE HANDLER
   const handleSaveUsp = (uspData, isEditMode) => {
     if (isEditMode && editingUsp !== null && typeof editingUsp.index === 'number') {
       const updatedUsps = [...localFormData.uspItems];
@@ -93,10 +110,10 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
         uspItems: updatedUsps
       });
     }
-    handleCloseUspModal(); // Add this line to close modal after saving
+    handleCloseUspModal();
   };
 
-  // Fixed FEATURED SAVE HANDLER
+  // FEATURED SAVE HANDLER
   const handleSaveFeatured = (featuredData, isEditMode) => {
     if (isEditMode && editingFeatured !== null && typeof editingFeatured.index === 'number') {
       const updatedFeatured = [...localFormData.featuredItems];
@@ -112,14 +129,13 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
         featuredItems: updatedFeatured
       });
     }
-    handleCloseFeaturedModal(); // Add this line to close modal after saving
+    handleCloseFeaturedModal();
   };
 
   const handleCloseServiceModal = () => {
     setServiceModalOpen(false);
     setEditingService(null);
   };
-
 
   const handleDeleteService = (index, event) => {
     event.stopPropagation();
@@ -193,7 +209,7 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   };
 
   return (
-    <div className="flex flex-col h-[88vh]">
+    <div className="flex flex-col h-full">
       {/* Left sidebar for title and tooltip */}
       <div className="flex flex-1">
         <div className="relative w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
@@ -440,7 +456,7 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-end mt-12 space-x-4">
+             <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
               <button
                 type="button"
                 onClick={handlePrevious}
@@ -461,28 +477,34 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
       </div>
 
       {/* Service Creation Modal */}
-      <ServiceCreationModal
-        isOpen={serviceModalOpen}
-        onClose={handleCloseServiceModal}
-        onSave={handleSaveService}
-        editData={editingService}
-      />
+      {serviceModalOpen && (
+        <ServiceCreationModal
+          isOpen={serviceModalOpen}
+          onClose={handleCloseServiceModal}
+          onSave={handleSaveService}
+          editData={editingService}
+        />
+      )}
 
       {/* USP Creation Modal */}
-      <UspCreationModal
-        isOpen={uspModalOpen}
-        onClose={handleCloseUspModal}
-        onSave={handleSaveUsp}
-        editData={editingUsp}
-      />
+      {uspModalOpen && (
+        <UspCreationModal
+          isOpen={uspModalOpen}
+          onClose={handleCloseUspModal}
+          onSave={handleSaveUsp}
+          editData={editingUsp}
+        />
+      )}
 
       {/* Featured Group Creation Modal */}
-      <FeaturedGroupCreationModal
-        isOpen={featuredModalOpen}
-        onClose={handleCloseFeaturedModal}
-        onSave={handleSaveFeatured}
-        editData={editingFeatured}
-      />
+      {featuredModalOpen && (
+        <FeaturedGroupCreationModal
+          isOpen={featuredModalOpen}
+          onClose={handleCloseFeaturedModal}
+          onSave={handleSaveFeatured}
+          editData={editingFeatured}
+        />
+      )}
     </div>
   );
 };
