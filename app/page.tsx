@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client'
 import { useState, useEffect } from 'react';
 import {
@@ -19,12 +20,14 @@ export default function Home() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeContent, setActiveContent] = useState('pages');
   const router = useRouter();
-  const [landingPageData, setLandingPageData] = useState([]);
-  const [searchData, setSearchData] = useState([]);
+  const [landingPageData, setLandingPageData] = useState<any[]>([]);
+  const [searchData, setSearchData] = useState<any[]>([]);
 
   // Logout handler
   const handleLogout = () => {
-    localStorage.removeItem('auth');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth');
+    }
     setAuth(null);
     setIsLoggedIn(false);
     router.push('/login');
@@ -38,24 +41,19 @@ export default function Home() {
   }, [loading, isLoggedIn, router]);
 
   // Fetch Landing Pages
-   const fetchLandingPageData = async (userId) => {
+  const fetchLandingPageData = async (userId: string) => {
     console.log("user id", userId)
-      try {
-        const res = await fetch('/api/allLandingPages');
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        const filterLandingPages = data.data.filter((item) => item.user_created == userId);
-        setLandingPageData(filterLandingPages);
-        setSearchData(filterLandingPages);
-
-        // console.log("landing page data", data);
-         
-        // setLandingPageData(data);
-      } catch (err) {
-        alert('Failed to Fetch Landing Page Data:', err);
-        // console.error(err);
-      }
-    };
+    try {
+      const res = await fetch('/api/allLandingPages');
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      const filterLandingPages = data.data.filter((item: any) => item.user_created == userId);
+      setLandingPageData(filterLandingPages);
+      setSearchData(filterLandingPages);
+    } catch (err) {
+      alert('Failed to Fetch Landing Page Data:' + err);
+    }
+  };
 
   // Fetch users
   useEffect(() => {
@@ -66,19 +64,21 @@ export default function Home() {
           throw new Error('Failed to fetch users');
         }
         const data = await res.json();
-        const loginData = JSON.parse(localStorage.getItem('auth'));
-        const filterData = data.data.filter((item)=> item?.email == loginData?.email);
-         
-        if(filterData?.length > 0){
-          fetchLandingPageData(filterData[0]?.id);
-
+        
+        // Only access localStorage on client-side
+        if (typeof window !== 'undefined') {
+          const authItem = localStorage.getItem('auth');
+          if (authItem) {
+            const loginData = JSON.parse(authItem);
+            const filterData = data.data.filter((item: any) => item?.email == loginData?.email);
+            
+            if(filterData?.length > 0){
+              fetchLandingPageData(filterData[0]?.id);
+            }
+          }
         }
-
-        // console.log("user data", data);
-       
       } catch (err) {
-        alert('Error fetching users:', err);
-        // Optionally handle error (e.g., show error message to user)
+        alert('Error fetching users:' + err);
       }
     };
 
@@ -94,13 +94,13 @@ export default function Home() {
   const renderContent = () => {
     switch (activeContent) {
       case 'pages':
-        return <PagesContent landingPageData={landingPageData} setLandingPageData={setLandingPageData} searchData={searchData} setSearchData={setSearchData}  />;
+        return <PagesContent landingPageData={landingPageData} setLandingPageData={setLandingPageData} searchData={searchData} setSearchData={setSearchData} />;
       case 'leads':
         return <LeadsContent />;
       case 'analytics':
         return <AnalyticsContent />;
       default:
-        return <PagesContent />;
+        return <PagesContent landingPageData={landingPageData} setLandingPageData={setLandingPageData} searchData={searchData} setSearchData={setSearchData} />;
     }
   };
 

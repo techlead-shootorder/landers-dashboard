@@ -1,3 +1,4 @@
+// app/login/page.jsx
 "use client"
 import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
@@ -23,51 +24,48 @@ export default function AuthForm() {
     setName('');
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log("email", email);
-  console.log("passowrd", password);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("email", email);
+    console.log("passowrd", password);
 
-  try {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    console.log("data", data);
-    // return;
+      console.log("data", data);
 
-    if (!response.ok) {
-      console.error('Login failed:', data.error);
-      alert(data.error);
-      return;
+      if (!response.ok) {
+        console.error('Login failed:', data.error);
+        alert(data.error);
+        return;
+      }
+
+      // Combine user and token into one object
+      const authData = data.loginData;
+
+      const userData = {...authData, email}
+      
+      // Make sure we only access localStorage on the client side
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth', JSON.stringify(userData));
+      }
+      
+      setAuth(userData);
+      setIsLoggedIn(true);
+      router.push('/');
+    } catch (error) {
+      console.error('An unexpected error occurred:', error);
+      alert('Something went wrong. Please try again.');
     }
-
-    // Combine user and token into one object
-    const authData = data.loginData;
-
-    const userData = {...authData, email}
-    
-    // console.log("authData", authData);
-
-    // Store in localStorage under a single key
-    localStorage.setItem('auth', JSON.stringify(userData));
-    setIsLoggedIn(true);
-    // console.log('Login successful:', authData);
-    // You can redirect or update state here
-    router.push('/');
-  } catch (error) {
-    console.error('An unexpected error occurred:', error);
-    alert('Something went wrong. Please try again.');
-  }
-};
-
-
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -77,7 +75,6 @@ const handleSubmit = async (e) => {
           <div className="text-6xl font-bold mb-2 text-white flex items-center justify-center">
             L<span className="bg-white text-red-500 rounded-full w-12 h-12 flex items-center justify-center">@</span>nders
           </div>
-          {/* <p className="text-white text-lg">Bold ideas. Real impact.</p> */}
         </div>
       </div>
 
