@@ -6,7 +6,8 @@ const CTAModal = ({ isCtaModalOpen, editingIndex, closeCtaModal, ctaFormData, ha
     if (!isCtaModalOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-end z-50">
+        <div className="fixed inset-0 flex items-start justify-end z-50">
+             <div className=' bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
             <div className="bg-[#121621] h-full overflow-y-auto shadow-xl w-full max-w-md transform transition-transform duration-500 ease-out translate-x-0">
                 <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700 sticky top-0 bg-[#121621] z-10">
                     <h3 className="text-lg font-medium text-white">
@@ -25,14 +26,14 @@ const CTAModal = ({ isCtaModalOpen, editingIndex, closeCtaModal, ctaFormData, ha
                         <label className="block text-sm font-medium text-gray-300 mb-2">CTA Type</label>
                         <div className="relative">
                             <select
-                                name="type"
-                                value={ctaFormData.type}
+                                name="cta_type"
+                                value={ctaFormData.cta_type}
                                 onChange={handleCtaFormChange}
                                 className="w-full p-3 bg-[#1A1F2E] text-white border border-gray-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent appearance-none"
                             >
-                                <option value="primary">Primary</option>
-                                <option value="secondary">Secondary</option>
-                                <option value="tertiary">Tertiary</option>
+                                <option value="Primary">Primary</option>
+                                <option value="Secondary">Secondary</option>
+                                <option value="Tertiary">Tertiary</option>
                             </select>
                             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -46,17 +47,17 @@ const CTAModal = ({ isCtaModalOpen, editingIndex, closeCtaModal, ctaFormData, ha
                         <label className="block text-sm font-medium text-gray-300 mb-2">CTA</label>
                         <div className="relative">
                             <select
-                                name="action"
-                                value={ctaFormData.action}
+                                name="cta"
+                                value={ctaFormData.cta}
                                 onChange={handleCtaFormChange}
                                 className="w-full p-3 bg-[#1A1F2E] text-white border border-gray-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent appearance-none"
                             >
                                 <option value="" disabled>Select an action...</option>
-                                <option value="form">Form</option>
-                                <option value="call">Call</option>
-                                <option value="whatsapp">WhatsApp</option>
-                                <option value="email">Email</option>
-                                <option value="outbound">Outbound Click</option>
+                                <option value="Form">Form</option>
+                                <option value="Call">Call</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Email">Email</option>
+                                <option value="Outbound Click">Outbound Click</option>
                             </select>
                             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -70,8 +71,8 @@ const CTAModal = ({ isCtaModalOpen, editingIndex, closeCtaModal, ctaFormData, ha
                         <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
                         <input
                             type="text"
-                            name="name"
-                            value={ctaFormData.name}
+                            name="Name"
+                            value={ctaFormData.Name}
                             onChange={handleCtaFormChange}
                             placeholder="CTA name"
                             className="w-full p-3 bg-[#1A1F2E] text-white border border-gray-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"

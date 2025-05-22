@@ -1,20 +1,25 @@
 'use client';
 
 import { useState } from "react";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, Loader2 } from "lucide-react";
+import { toast } from 'react-hot-toast';
 
 const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
-  // Local state for form handling - KEEPING ORIGINAL FORM DATA STRUCTURE
+  // Local state for form handling with updated key names
   const [localFormData, setLocalFormData] = useState({
     name: formData.name || "",
-    companyName: formData.companyName || "",
+    company_name: formData.company_name || "",
     domain: formData.domain || "",
     slug: formData.slug || "",
     email: formData.email || "",
     phone: formData.phone || "",
-    address: formData.address || "",
-    whatsapp: formData.whatsapp || "",
+    whatsapp_number: formData.whatsapp_number || "",
   });
+
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -23,14 +28,96 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
       ...localFormData,
       [name]: value,
     });
+    
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
+  // Validate form data
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!localFormData.name.trim()) {
+      errors.push('Name is required');
+    }
+    
+    if (!localFormData.company_name.trim()) {
+      errors.push('Company Name is required');
+    }
+    
+    if (!localFormData.email.trim()) {
+      errors.push('Email is required');
+    } else if (!/\S+@\S+\.\S+/.test(localFormData.email)) {
+      errors.push('Please enter a valid email address');
+    }
+    
+    return errors;
+  };
+
+  // Handle API call to create landing page
+  const createLandingPage = async (formData) => {
+    try {
+      const response = await fetch('/api/createLandingPage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create landing page');
+      }
+      toast.success('Page created Successfully')
+      return result;
+    } catch (error) {
+      toast.error('Error in Creating Page')
+      throw error;
+    }
   };
 
   // Handle next button click
-  const handleNext = () => {
-    // Update parent form data
-    updateFormData(localFormData);
-    // Go to next step
-    goToNextStep();
+  const handleNext = async () => {
+    // Clear previous messages
+    setError('');
+    setSuccess('');
+
+    // Validate form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(', '));
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Call API to create landing page
+      const result = await createLandingPage(localFormData);
+      
+      // Update parent form data with the response data
+      const updatedFormData = {
+        ...localFormData,
+        apiResponse: result.data, // Store full API response for later use
+      };
+      
+      updateFormData(updatedFormData);
+      
+      setSuccess('Landing page created successfully!');
+      
+      // Small delay to show success message
+      setTimeout(() => {
+        goToNextStep();
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error creating landing page:', error);
+      setError(error.message || 'Failed to create landing page. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,11 +143,25 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
         <div className="w-2/3 bg-white p-12 relative">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Details</h2>
           
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-800 text-sm">{success}</p>
+            </div>
+          )}
+          
           <div className="grid grid-cols-2 gap-6">
             {/* Name field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
+                Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -68,24 +169,28 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="name"
                 value={localFormData.name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Name"
+                required
               />
             </div>
             
             {/* Company Name field */}
             <div>
-              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
-                Company Name
+              <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
+                Company Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                id="companyName"
-                name="companyName"
-                value={localFormData.companyName}
+                id="company_name"
+                name="company_name"
+                value={localFormData.company_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Comapany"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="Company"
+                required
               />
             </div>
             
@@ -100,31 +205,16 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="domain"
                 value={localFormData.domain}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Domain"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="https://example.com"
               />
             </div>
-            
-            {/* Slug field */}
-            {/* <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                Slug
-              </label>
-              <input
-                type="text"
-                id="slug"
-                name="slug"
-                value={localFormData.slug}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Slug"
-              />
-            </div> */}
             
             {/* Email field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -132,8 +222,10 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="email"
                 value={localFormData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="email"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="email@example.com"
+                required
               />
             </div>
             
@@ -148,40 +240,26 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 name="phone"
                 value={localFormData.phone}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Phone"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="1234567890"
               />
             </div>
             
-            {/* Address field */}
-            {/* <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                Address
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={localFormData.address}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Address"
-              />
-            </div> */}
-            
             {/* WhatsApp field */}
             <div>
-              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="whatsapp_number" className="block text-sm font-medium text-gray-700 mb-1">
                 WhatsApp
               </label>
               <input
                 type="tel"
-                id="whatsapp"
-                name="whatsapp"
-                value={localFormData.whatsapp}
+                id="whatsapp_number"
+                name="whatsapp_number"
+                value={localFormData.whatsapp_number}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Whatsapp"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="1234567890"
               />
             </div>
           </div>
@@ -190,16 +268,19 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
-              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
+              disabled={isLoading}
+              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
               type="button"
               onClick={handleNext}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+              disabled={isLoading}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Next
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isLoading ? 'Creating...' : 'Next'}
             </button>
           </div>
         </div>

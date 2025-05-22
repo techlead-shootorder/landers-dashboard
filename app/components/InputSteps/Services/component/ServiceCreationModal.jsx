@@ -5,9 +5,9 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
   const [serviceData, setServiceData] = useState({
     title: '',
     description: '',
-    icon: '',
-    serviceIconUrl: '',
-    hasCover: false
+    icon: null,
+    service_icon_url: '',
+    cover: false
   });
   
   // Animation states
@@ -20,16 +20,22 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
       
       // If editData is provided, populate the form for editing
       if (editData) {
-        setServiceData(editData);
+        setServiceData({
+          title: editData.title || '',
+          description: editData.description || '',
+          icon: editData.icon || null,
+          service_icon_url: editData.service_icon_url || '',
+          cover: editData.cover || false
+        });
         setIsEditMode(true);
       } else {
         // Reset form for create mode
         setServiceData({
           title: '',
           description: '',
-          icon: '',
-          serviceIconUrl: '',
-          hasCover: false
+          icon: null,
+          service_icon_url: '',
+          cover: false
         });
         setIsEditMode(false);
       }
@@ -59,7 +65,8 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
   };
   
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-start justify-end z-50 transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`fixed inset-0  flex items-start justify-end z-50 transition-opacity duration-300`}>
+       <div className=' bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
       <div className={`bg-white h-full overflow-y-auto shadow-xl w-full max-w-md transform transition-transform duration-500 ease-out ${isAnimating ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <h3 className="text-lg font-medium text-gray-800">
@@ -107,9 +114,9 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
               <input
                 type="text"
                 name="icon"
-                value={serviceData.icon}
+                value={serviceData.icon || ''}
                 onChange={handleInputChange}
-                placeholder="Enter icon name"
+                placeholder="Enter icon name (optional)"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
@@ -119,8 +126,8 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Service Icon URL</label>
               <input
                 type="text"
-                name="serviceIconUrl"
-                value={serviceData.serviceIconUrl}
+                name="service_icon_url"
+                value={serviceData.service_icon_url}
                 onChange={handleInputChange}
                 placeholder="Enter service icon URL"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
@@ -132,12 +139,12 @@ const ServiceCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  name="hasCover"
-                  checked={serviceData.hasCover}
+                  name="cover"
+                  checked={serviceData.cover}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500"
                 />
-                <span className="text-sm text-gray-700">Has Cover</span>
+                <span className="text-sm text-gray-700">Cover Service</span>
               </label>
             </div>
           </div>

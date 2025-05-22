@@ -13,10 +13,12 @@ import TimelineStep from "../components/InputSteps/Timeline/TimelineStep";
 import TestimonialsCTA from "../components/InputSteps/Testimonials&CTA/TestimonialsCTA";
 import FaqAndInsta from "../components/InputSteps/FAQ&Insta/FaqAndInsta";
 import SeoAndLegal from "../components/InputSteps/SeoAndLegal/SeoAndLegal";
+import ThankYou from "../components/InputSteps/ThankYou/ThankYou";
+
 // Import other step components as you create them
 // ...and so on
 
-const CreatePage = () => {
+const CreatePage = () => {  
   // Current step tracker
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 10;
@@ -28,12 +30,7 @@ const CreatePage = () => {
   // Consolidated form data for all steps
   const [formData, setFormData] = useState({
     // Basic Details (Step 1)
-    companyName: "",
-    funnelName: "",
-    domain: "",
-    phone: "",
-    whatsapp: "",
-    email: "",
+   
     // Add fields for other steps as you create them
   });
 
@@ -80,6 +77,8 @@ const CreatePage = () => {
 
   // Handle form data changes from any step
   const updateFormData = (newData) => {
+    console.log("main fomr data", formData);
+    console.log("local form data", newData);
     setFormData({
       ...formData,
       ...newData
@@ -88,6 +87,7 @@ const CreatePage = () => {
 
   // Navigate to next step
   const goToNextStep = () => {
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -176,6 +176,16 @@ const CreatePage = () => {
             formData={formData}
             updateFormData={updateFormData}
             goToNextStep={goToNextStep}
+            goToPrevStep={goToPrevStep}
+
+          />
+        );
+        case 9:
+        return (
+          <ThankYou
+            formData={formData}
+            // updateFormData={updateFormData}
+            // goToNextStep={goToNextStep}
             goToPrevStep={goToPrevStep}
 
           />

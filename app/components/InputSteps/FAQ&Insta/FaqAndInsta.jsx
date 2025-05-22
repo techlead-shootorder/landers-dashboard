@@ -3,39 +3,31 @@
 import { useState } from "react";
 import { InfoIcon, Trash2, X } from "lucide-react";
 import FAQModal from "./component/FAQModal";
+import { toast } from 'react-hot-toast';
 
-const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-  // Local state for FAQs
-  const [localFormData, setLocalFormData] = useState({
-    heading: formData.heading || "",
-    subHeading: formData.subHeading || "",
-    socialHeading: formData.socialHeading || "",
-    instaId: formData.instaId || "",
-    embedCode: formData.embedCode || "",
-    faqs: formData.faqs || []
-  });
 
+const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pageId }) => {
   // State for modal
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
-  
+
   // State for modal forms
   const [faqFormData, setFaqFormData] = useState({
     question: "",
     answer: ""
   });
-  
+
   // State for editing
   const [editingIndex, setEditingIndex] = useState(-1);
-  
+
   // Handle input changes for form fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: value
     });
   };
-  
+
   // Handle FAQ modal input changes
   const handleFaqFormChange = (e) => {
     const { name, value } = e.target;
@@ -44,12 +36,12 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
       [name]: value
     });
   };
-  
+
   // Open FAQ modal
   const openFaqModal = () => {
     setIsFaqModalOpen(true);
   };
-  
+
   // Close FAQ modal
   const closeFaqModal = () => {
     setIsFaqModalOpen(false);
@@ -59,11 +51,11 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
     });
     setEditingIndex(-1);
   };
-  
+
   // Save FAQ
   const saveFaq = () => {
-    const newFaqs = [...localFormData.faqs];
-    
+    const newFaqs = [...(formData.faqs || [])];
+
     if (editingIndex >= 0) {
       // Edit existing FAQ
       newFaqs[editingIndex] = { ...faqFormData };
@@ -71,41 +63,63 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
       // Add new FAQ
       newFaqs.push({ ...faqFormData });
     }
-    
-    setLocalFormData({
-      ...localFormData,
+
+    updateFormData({
+      ...formData,
       faqs: newFaqs
     });
-    
+
     closeFaqModal();
   };
-  
+
   // Edit FAQ
   const editFaq = (index) => {
     setFaqFormData({
-      ...localFormData.faqs[index]
+      ...formData.faqs[index]
     });
     setEditingIndex(index);
     setIsFaqModalOpen(true);
   };
-  
+
   // Delete FAQ
   const deleteFaq = (index) => {
-    const newFaqs = [...localFormData.faqs];
+    const newFaqs = [...(formData.faqs || [])];
     newFaqs.splice(index, 1);
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       faqs: newFaqs
     });
   };
-  
-  // Handle next button click
-  const handleNext = () => {
-    // Update parent form data
-    updateFormData(localFormData);
-    // Go to next step
+
+  function handleNext() {
+    // console.log("form data in faq", formData);
     goToNextStep();
+  }
+
+  const handleUpdateData = async (state) => {
+    try {
+      const response = await fetch(`/api/updateData?id=${pageId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(state),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      console.log("Update Successful:", data);
+      toast.success("Data saved successfully");
+    } catch (error) {
+      console.error("Error updating data:", error.message);
+      toast.error("Something went wrong while saving data");
+    }
   };
+
 
   return (
     <div className="flex flex-col h-[88vh]">
@@ -121,7 +135,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
           <div className="flex items-start mb-8">
             <InfoIcon className="w-6 h-6 mr-2 text-gray-500 flex-shrink-0" />
             <p className="text-sm text-gray-600">
-              FAQs help address common questions and concerns your visitors might have. 
+              FAQs help address common questions and concerns your visitors might have.
               Clear, concise answers build trust and improve user experience.
             </p>
           </div>
@@ -132,7 +146,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
           {/* Headings Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">FAQ's</h2>
-            
+
             {/* Heading & Sub Heading inputs */}
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
@@ -141,22 +155,22 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                 </label>
                 <input
                   type="text"
-                  name="heading"
-                  value={localFormData.heading}
+                  name="faq_heading"
+                  value={formData.faq_heading || ""}
                   onChange={handleInputChange}
                   placeholder="Elodent - Dental Implants Offer"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Sub Heading
                 </label>
                 <input
                   type="text"
-                  name="subHeading"
-                  value={localFormData.subHeading}
+                  name="faq_sub_heading"
+                  value={formData.faq_sub_heading || ""}
                   onChange={handleInputChange}
                   placeholder="Elodent - Dental Implants Offer"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
@@ -164,17 +178,17 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
               </div>
             </div>
           </div>
-          
+
           {/* FAQs Section */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-6">FAQs</h2>
 
             {/* FAQs Display */}
-            {localFormData.faqs.length > 0 && (
+            {formData.faqs && formData.faqs.length > 0 && (
               <div className="grid grid-cols-3 gap-4 mb-6">
-                {localFormData.faqs.map((faq, index) => (
-                  <div 
-                    key={index} 
+                {formData.faqs.map((faq, index) => (
+                  <div
+                    key={index}
                     className="flex justify-between items-center bg-gray-50 p-4 rounded-md border border-gray-200 cursor-pointer hover:bg-gray-100"
                     onClick={() => editFaq(index)}
                   >
@@ -182,7 +196,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                       <h4 className="font-medium text-gray-800">{faq.question}</h4>
                       {/* <p className="text-gray-500 text-sm mt-1 truncate">{faq.answer}</p> */}
                     </div>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteFaq(index);
@@ -195,7 +209,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                 ))}
               </div>
             )}
-            
+
             {/* Create New FAQ Button */}
             <div className="mb-6">
               <button
@@ -205,14 +219,12 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                 Create New
               </button>
             </div>
-            
-            
           </div>
-          
+
           {/* Social Section */}
-          <div className="mb-8">
+          <div className="mb-10">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Social Media</h2>
-            
+
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -220,22 +232,22 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                 </label>
                 <input
                   type="text"
-                  name="socialHeading"
-                  value={localFormData.socialHeading}
+                  name="social_heading"
+                  value={formData.social_heading || ""}
                   onChange={handleInputChange}
                   placeholder="Elodent - Dental Implants Offer"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Insta Id
                 </label>
                 <input
                   type="text"
-                  name="instaId"
-                  value={localFormData.instaId}
+                  name="insta_id"
+                  value={formData.insta_id || ""}
                   onChange={handleInputChange}
                   placeholder="Elodent - Dental Implants Offer"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
@@ -243,25 +255,9 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
               </div>
             </div>
           </div>
-          
-          {/* Embed Code Section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Embed Code</h2>
-            
-            <div>
-              <textarea
-                name="embedCode"
-                value={localFormData.embedCode}
-                onChange={handleInputChange}
-                placeholder="Paste embed code here"
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
-              />
-            </div>
-          </div>
 
           {/* Navigation Buttons */}
-           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={goToPrevStep}
@@ -276,17 +272,24 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
             >
               Next
             </button>
-          </div>
+            <button
+              type="button"
+              onClick={() => handleUpdateData(formData)}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+            >
+              SAVE
+            </button>
+          </div> */}
         </div>
       </div>
-      
+
       {/* Render Modal */}
-      <FAQModal 
-        isFaqModalOpen={isFaqModalOpen} 
-        editingIndex={editingIndex} 
-        closeFaqModal={closeFaqModal} 
-        saveFaq={saveFaq} 
-        faqFormData={faqFormData} 
+      <FAQModal
+        isFaqModalOpen={isFaqModalOpen}
+        editingIndex={editingIndex}
+        closeFaqModal={closeFaqModal}
+        saveFaq={saveFaq}
+        faqFormData={faqFormData}
         handleFaqFormChange={handleFaqFormChange}
       />
     </div>

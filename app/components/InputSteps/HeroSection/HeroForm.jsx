@@ -239,7 +239,7 @@ const HeroForm = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
               onClick={handleNext}
               className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
             >
-              Next
+              Agla
             </button>
           </div>
         </div>

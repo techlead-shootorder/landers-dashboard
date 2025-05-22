@@ -5,36 +5,24 @@ import { InfoIcon, X, Trash2 } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
 
 const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-  // Local state for form handling
-  const [localFormData, setLocalFormData] = useState({
-    aboutUsHeading: formData.aboutUsHeading || "",
-    aboutUsSubHeading: formData.aboutUsSubHeading || "",
-    aboutUsContent: formData.aboutUsContent || "",
-    embedCode: formData.embedCode || "",
-    banner: formData.banner || null,
-    mobileBanner: formData.mobileBanner || null,
-    highlights: formData.highlights || []
-  });
-
   const bannerInputRef = useRef(null);
-  const mobileBannerInputRef = useRef(null);
 
   const [previews, setPreviews] = useState({
-    banner: formData.banner ? URL.createObjectURL(formData.banner) : null,
-    mobileBanner: formData.mobileBanner ? URL.createObjectURL(formData.mobileBanner) : null,
+    about_us_image: formData.about_us_image ? URL.createObjectURL(formData.about_us_image) : null,
   });
 
   // Handle adding a new highlight
   const handleAddHighlight = () => {
-    if (localFormData.highlights.length >= 5) {
+    const currentHighlights = formData.highlights || [];
+    if (currentHighlights.length >= 5) {
       alert("Maximum 5 highlights allowed");
       return;
     }
 
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       highlights: [
-        ...localFormData.highlights,
+        ...currentHighlights,
         { highlight: "", highlight_description: "" }
       ]
     });
@@ -42,22 +30,24 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // Handle removing a highlight
   const handleRemoveHighlight = (index) => {
-    const updatedHighlights = [...localFormData.highlights];
+    const currentHighlights = formData.highlights || [];
+    const updatedHighlights = [...currentHighlights];
     updatedHighlights.splice(index, 1);
 
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       highlights: updatedHighlights
     });
   };
 
   // Handle highlight input changes
   const handleHighlightChange = (index, field, value) => {
-    const updatedHighlights = [...localFormData.highlights];
+    const currentHighlights = formData.highlights || [];
+    const updatedHighlights = [...currentHighlights];
     updatedHighlights[index][field] = value;
 
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       highlights: updatedHighlights
     });
   };
@@ -65,8 +55,8 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: value,
     });
   };
@@ -75,9 +65,9 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   const handleFileUpload = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
-      // Update local form data with file
-      setLocalFormData({
-        ...localFormData,
+      // Update form data with file
+      updateFormData({
+        ...formData,
         [fieldName]: file,
       });
 
@@ -98,12 +88,11 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
     }
 
     // Reset the file input
-    if (fieldName === 'banner') bannerInputRef.current.value = null;
-    if (fieldName === 'mobileBanner') mobileBannerInputRef.current.value = null;
+    if (fieldName === 'about_us_image') bannerInputRef.current.value = null;
 
     // Update states
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [fieldName]: null,
     });
 
@@ -115,17 +104,12 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // Handle next button click
   const handleNext = () => {
-    // Update parent form data
-    updateFormData(localFormData);
-    // Go to next step
+   
     goToNextStep();
   };
 
   // Handle previous button click
   const handlePrevious = () => {
-    // Update parent form data
-    updateFormData(localFormData);
-    // Go to previous step
     goToPrevStep();
   };
 
@@ -156,7 +140,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             <p className="text-gray-600 text-sm mb-4">Add minimum 3 highlights and maximum 5 highlights</p>
 
             {/* Display existing highlights */}
-            {localFormData.highlights.map((highlight, index) => (
+            {(formData.highlights || []).map((highlight, index) => (
               <div key={index} className="flex items-center gap-4 mb-4">
                 <div className="w-5/12">
                   <label htmlFor={`highlight-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -165,7 +149,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                   <input
                     type="text"
                     id={`highlight-${index}`}
-                    value={highlight.highlight}
+                    value={highlight.highlight || ""}
                     onChange={(e) => handleHighlightChange(index, "highlight", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="e.g. 10,000+"
@@ -179,7 +163,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                   <input
                     type="text"
                     id={`highlight-desc-${index}`}
-                    value={highlight.highlight_description}
+                    value={highlight.highlight_description || ""}
                     onChange={(e) => handleHighlightChange(index, "highlight_description", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="e.g. Clients"
@@ -202,7 +186,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
               <button
                 className="bg-gray-300 rounded-md p-2 hover:bg-gray-400 transition-colors duration-200"
                 onClick={handleAddHighlight}
-                disabled={localFormData.highlights.length >= 5}
+                disabled={(formData.highlights || []).length >= 5}
               >
                 Create Highlight
               </button>
@@ -216,14 +200,14 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             {/* About Us Heading field */}
             <div className="flex gap-6">
               <div className="w-1/2">
-                <label htmlFor="aboutUsHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="about_us_heading" className="block text-sm font-medium text-gray-700 mb-1">
                   About Us Heading
                 </label>
                 <input
                   type="text"
-                  id="aboutUsHeading"
-                  name="aboutUsHeading"
-                  value={localFormData.aboutUsHeading}
+                  id="about_us_heading"
+                  name="about_us_heading"
+                  value={formData.about_us_heading || ""}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   placeholder="About Us Heading"
@@ -232,14 +216,14 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
               {/* About Us Sub Heading field */}
               <div className="w-1/2">
-                <label htmlFor="aboutUsSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="about_us_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
                   About Us Sub Heading
                 </label>
                 <input
                   type="text"
-                  id="aboutUsSubHeading"
-                  name="aboutUsSubHeading"
-                  value={localFormData.aboutUsSubHeading}
+                  id="about_us_sub_heading"
+                  name="about_us_sub_heading"
+                  value={formData.about_us_sub_heading || ""}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   placeholder="About Us Sub Heading"
@@ -250,30 +234,30 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             <div className="flex gap-6 w-full">
               {/* About Us Content field */}
               <div className="w-1/2">
-                <label htmlFor="aboutUsContent" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="about_us_content" className="block text-sm font-medium text-gray-700 mb-1">
                   About Us Content
                 </label>
                 <textarea
                   type="text"
-                  id="aboutUsContent"
-                  name="aboutUsContent"
+                  id="about_us_content"
+                  name="about_us_content"
                   rows="6"
-                  value={localFormData.aboutUsContent}
+                  value={formData.about_us_content || ""}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="enquiry.eledenthosipatals.com"
+                  placeholder="Enter about us content here"
                 />
               </div>
 
               {/* Embed Code field */}
               <div className="w-1/2">
-                <label htmlFor="embedCode" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="embed_code" className="block text-sm font-medium text-gray-700 mb-1">
                  Youtube Embed Code
                 </label>
                 <textarea
-                  id="embedCode"
-                  name="embedCode"
-                  value={localFormData.embedCode}
+                  id="embed_code"
+                  name="embed_code"
+                  value={formData.embed_code || ""}
                   onChange={handleInputChange}
                   rows="6"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -283,21 +267,21 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             </div>
 
             {/* About uploads section */}
-            <div className="grid grid-cols-2 gap-6 mt-4">
+            <div className="grid grid-cols-2 gap-6 mt-4 mb-10">
               {/* About image upload */}
               <div>
                 <p className="block text-sm font-medium text-gray-700 mb-2">About Us Image</p>
                 <div className="flex flex-col">
-                  {previews.banner ? (
+                  {previews.about_us_image ? (
                     <div className="relative mb-2">
                       <img
-                        src={previews.banner}
+                        src={previews.about_us_image}
                         alt="Banner preview"
                         className="w-32 h-32 object-contain border rounded"
                       />
                       <button
                         type="button"
-                        onClick={() => handleRemoveImage('banner')}
+                        onClick={() => handleRemoveImage('about_us_image')}
                         className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                       >
                         <X size={16} />
@@ -318,17 +302,15 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                     ref={bannerInputRef}
                     className="hidden"
                     accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'banner')}
+                    onChange={(e) => handleFileUpload(e, 'about_us_image')}
                   />
                 </div>
               </div>
-
-
             </div>
           </div>
 
           {/* Navigation Buttons */}
-           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+           {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={handlePrevious}
@@ -343,7 +325,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             >
               Next
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

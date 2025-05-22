@@ -1,52 +1,12 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { InfoIcon, Trash } from "lucide-react";
 import ServiceCreationModal from "./component/ServiceCreationModal";
 import UspCreationModal from "./component/UspCreationModal";
 import FeaturedGroupCreationModal from "./component/FeaturedGroupCreationModal";
 
 const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-  // Local state for form handling
-  const [localFormData, setLocalFormData] = useState({
-    // Services section
-    servicesHeading: "",
-    servicesSectionSubHeading: "",
-    services: [],
-
-    // USP Group section
-    uspGroupHeading: "",
-    uspGroupSubHeading: "",
-    uspItems: [],
-
-    // Featured Group section
-    featuredGroupHeading: "",
-    featuredGroupSubHeading: "",
-    featuredItems: [],
-  });
-
-  // Initialize local form data from props
-  useEffect(() => {
-    if (formData) {
-      setLocalFormData({
-        // Services section
-        servicesHeading: formData.servicesHeading || "",
-        servicesSectionSubHeading: formData.servicesSectionSubHeading || "",
-        services: formData.services || [],
-
-        // USP Group section
-        uspGroupHeading: formData.uspGroupHeading || "",
-        uspGroupSubHeading: formData.uspGroupSubHeading || "",
-        uspItems: formData.uspItems || [],
-
-        // Featured Group section
-        featuredGroupHeading: formData.featuredGroupHeading || "",
-        featuredGroupSubHeading: formData.featuredGroupSubHeading || "",
-        featuredItems: formData.featuredItems || [],
-      });
-    }
-  }, [formData]);
-
   // States for modals
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
   const [uspModalOpen, setUspModalOpen] = useState(false);
@@ -59,8 +19,8 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   // Handle input changes for text fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: value
     });
   };
@@ -77,17 +37,25 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // SERVICE SAVE HANDLER
   const handleSaveService = (serviceData, isEditMode) => {
+    const currentServices = formData.services || [];
+    
+    // Add cover property if it doesn't exist
+    const serviceWithCover = {
+      ...serviceData,
+      cover: serviceData.cover !== undefined ? serviceData.cover : false
+    };
+
     if (isEditMode && editingService !== null && typeof editingService.index === 'number') {
-      const updatedServices = [...localFormData.services];
-      updatedServices[editingService.index] = serviceData;
-      setLocalFormData({
-        ...localFormData,
+      const updatedServices = [...currentServices];
+      updatedServices[editingService.index] = serviceWithCover;
+      updateFormData({
+        ...formData,
         services: updatedServices
       });
     } else {
-      const updatedServices = [...localFormData.services, serviceData];
-      setLocalFormData({
-        ...localFormData,
+      const updatedServices = [...currentServices, serviceWithCover];
+      updateFormData({
+        ...formData,
         services: updatedServices
       });
     }
@@ -96,18 +64,26 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // USP SAVE HANDLER
   const handleSaveUsp = (uspData, isEditMode) => {
+    const currentUsp = formData.usp || [];
+    
+    // Add cover property if it doesn't exist
+    const uspWithCover = {
+      ...uspData,
+      cover: uspData.cover !== undefined ? uspData.cover : false
+    };
+
     if (isEditMode && editingUsp !== null && typeof editingUsp.index === 'number') {
-      const updatedUsps = [...localFormData.uspItems];
-      updatedUsps[editingUsp.index] = uspData;
-      setLocalFormData({
-        ...localFormData,
-        uspItems: updatedUsps
+      const updatedUsp = [...currentUsp];
+      updatedUsp[editingUsp.index] = uspWithCover;
+      updateFormData({
+        ...formData,
+        usp: updatedUsp
       });
     } else {
-      const updatedUsps = [...localFormData.uspItems, uspData];
-      setLocalFormData({
-        ...localFormData,
-        uspItems: updatedUsps
+      const updatedUsp = [...currentUsp, uspWithCover];
+      updateFormData({
+        ...formData,
+        usp: updatedUsp
       });
     }
     handleCloseUspModal();
@@ -115,18 +91,26 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // FEATURED SAVE HANDLER
   const handleSaveFeatured = (featuredData, isEditMode) => {
+    const currentFeatures = formData.features || [];
+    
+    // Add cover property if it doesn't exist
+    const featuredWithCover = {
+      ...featuredData,
+      cover: featuredData.cover !== undefined ? featuredData.cover : false
+    };
+
     if (isEditMode && editingFeatured !== null && typeof editingFeatured.index === 'number') {
-      const updatedFeatured = [...localFormData.featuredItems];
-      updatedFeatured[editingFeatured.index] = featuredData;
-      setLocalFormData({
-        ...localFormData,
-        featuredItems: updatedFeatured
+      const updatedFeatures = [...currentFeatures];
+      updatedFeatures[editingFeatured.index] = featuredWithCover;
+      updateFormData({
+        ...formData,
+        features: updatedFeatures
       });
     } else {
-      const updatedFeatured = [...localFormData.featuredItems, featuredData];
-      setLocalFormData({
-        ...localFormData,
-        featuredItems: updatedFeatured
+      const updatedFeatures = [...currentFeatures, featuredWithCover];
+      updateFormData({
+        ...formData,
+        features: updatedFeatures
       });
     }
     handleCloseFeaturedModal();
@@ -139,10 +123,11 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   const handleDeleteService = (index, event) => {
     event.stopPropagation();
-    const updatedServices = [...localFormData.services];
+    const currentServices = formData.services || [];
+    const updatedServices = [...currentServices];
     updatedServices.splice(index, 1);
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       services: updatedServices
     });
   };
@@ -164,11 +149,12 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   const handleDeleteUsp = (index, event) => {
     event.stopPropagation();
-    const updatedUsps = [...localFormData.uspItems];
-    updatedUsps.splice(index, 1);
-    setLocalFormData({
-      ...localFormData,
-      uspItems: updatedUsps
+    const currentUsp = formData.usp || [];
+    const updatedUsp = [...currentUsp];
+    updatedUsp.splice(index, 1);
+    updateFormData({
+      ...formData,
+      usp: updatedUsp
     });
   };
 
@@ -189,22 +175,22 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   const handleDeleteFeatured = (index, event) => {
     event.stopPropagation();
-    const updatedFeatured = [...localFormData.featuredItems];
-    updatedFeatured.splice(index, 1);
-    setLocalFormData({
-      ...localFormData,
-      featuredItems: updatedFeatured
+    const currentFeatures = formData.features || [];
+    const updatedFeatures = [...currentFeatures];
+    updatedFeatures.splice(index, 1);
+    updateFormData({
+      ...formData,
+      features: updatedFeatures
     });
   };
 
   // Navigation handlers
   const handleNext = () => {
-    updateFormData(localFormData);
+    // console.log("formData in services", formData);
     goToNextStep();
   };
 
   const handlePrevious = () => {
-    updateFormData(localFormData);
     goToPrevStep();
   };
 
@@ -238,14 +224,14 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   {/* Services Section Heading */}
                   <div>
-                    <label htmlFor="servicesHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="services_section_heading" className="block text-sm font-medium text-gray-700 mb-1">
                       Services Section Heading
                     </label>
                     <input
                       type="text"
-                      id="servicesHeading"
-                      name="servicesHeading"
-                      value={localFormData.servicesHeading}
+                      id="services_section_heading"
+                      name="services_section_heading"
+                      value={formData.services_section_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Services Heading"
@@ -254,14 +240,14 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
                   {/* Services Section Sub Heading */}
                   <div>
-                    <label htmlFor="servicesSectionSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="services_section_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
                       Services Section Sub Heading
                     </label>
                     <input
                       type="text"
-                      id="servicesSectionSubHeading"
-                      name="servicesSectionSubHeading"
-                      value={localFormData.servicesSectionSubHeading}
+                      id="services_section_sub_heading"
+                      name="services_section_sub_heading"
+                      value={formData.services_section_sub_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Services Sub-Heading"
@@ -270,11 +256,11 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 </div>
 
                 {/* Service list */}
-                {localFormData.services.length > 0 && (
+                {(formData.services || []).length > 0 && (
                   <div className="mt-4 mb-6">
                     <h3 className="text-sm font-medium text-gray-700 mb-3">Created Services</h3>
                     <div className="grid grid-cols-3 gap-2">
-                      {localFormData.services.map((service, index) => (
+                      {(formData.services || []).map((service, index) => (
                         <div
                           key={index}
                           className="flex justify-between items-center p-3 bg-gray-100 rounded-md border border-gray-300 cursor-pointer hover:bg-gray-200 transition-colors"
@@ -313,14 +299,14 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   {/* USP Group Heading */}
                   <div>
-                    <label htmlFor="uspGroupHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                      USP Group Heading
+                    <label htmlFor="usp_section_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                      USP Section Heading
                     </label>
                     <input
                       type="text"
-                      id="uspGroupHeading"
-                      name="uspGroupHeading"
-                      value={localFormData.uspGroupHeading}
+                      id="usp_section_heading"
+                      name="usp_section_heading"
+                      value={formData.usp_section_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="USP Heading"
@@ -329,14 +315,14 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
                   {/* USP Group Sub Heading */}
                   <div>
-                    <label htmlFor="uspGroupSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                      USP Group Sub Heading
+                    <label htmlFor="usp_section_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                      USP Section Sub Heading
                     </label>
                     <input
                       type="text"
-                      id="uspGroupSubHeading"
-                      name="uspGroupSubHeading"
-                      value={localFormData.uspGroupSubHeading}
+                      id="usp_section_sub_heading"
+                      name="usp_section_sub_heading"
+                      value={formData.usp_section_sub_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="USP Sub-Heading"
@@ -345,17 +331,17 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                 </div>
 
                 {/* USP items list */}
-                {localFormData.uspItems.length > 0 && (
+                {(formData.usp || []).length > 0 && (
                   <div className="mt-4 mb-6">
                     <h3 className="text-sm font-medium text-gray-700 mb-3">Created USPs</h3>
                     <div className="grid grid-cols-3 gap-2">
-                      {localFormData.uspItems.map((usp, index) => (
+                      {(formData.usp || []).map((uspItem, index) => (
                         <div
                           key={index}
                           className="flex justify-between items-center p-3 bg-gray-100 rounded-md border border-gray-300 cursor-pointer hover:bg-gray-200 transition-colors"
-                          onClick={() => handleOpenUspModal(usp, index)}
+                          onClick={() => handleOpenUspModal(uspItem, index)}
                         >
-                          <span className="font-medium text-gray-800">{usp.heading}</span>
+                          <span className="font-medium text-gray-800">{uspItem.usp_heading}</span>
                           <button
                             onClick={(e) => handleDeleteUsp(index, e)}
                             className="text-gray-600 hover:text-red-500 transition-colors duration-200"
@@ -381,56 +367,56 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
             </div>
 
             {/* FEATURED GROUP SECTION */}
-            <div>
+            <div className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-800 mb-8">Featured Group</h2>
 
               <div className="mb-4">
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   {/* Featured Group Heading */}
                   <div>
-                    <label htmlFor="featuredGroupHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                      Featured Group Heading
+                    <label htmlFor="features_section_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                      Features Section Heading
                     </label>
                     <input
                       type="text"
-                      id="featuredGroupHeading"
-                      name="featuredGroupHeading"
-                      value={localFormData.featuredGroupHeading}
+                      id="features_section_heading"
+                      name="features_section_heading"
+                      value={formData.features_section_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Featured Heading"
+                      placeholder="Features Heading"
                     />
                   </div>
 
                   {/* Featured Group Sub Heading */}
                   <div>
-                    <label htmlFor="featuredGroupSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
-                      Featured Group Sub Heading
+                    <label htmlFor="features_section_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                      Features Section Sub Heading
                     </label>
                     <input
                       type="text"
-                      id="featuredGroupSubHeading"
-                      name="featuredGroupSubHeading"
-                      value={localFormData.featuredGroupSubHeading}
+                      id="features_section_sub_heading"
+                      name="features_section_sub_heading"
+                      value={formData.features_section_sub_heading || ""}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Featured Sub-Heading"
+                      placeholder="Features Sub-Heading"
                     />
                   </div>
                 </div>
 
                 {/* Featured items list */}
-                {localFormData.featuredItems.length > 0 && (
+                {(formData.features || []).length > 0 && (
                   <div className="mt-4 mb-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">Created Featured Items</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">Created Features</h3>
                     <div className="grid grid-cols-3 gap-2">
-                      {localFormData.featuredItems.map((featured, index) => (
+                      {(formData.features || []).map((feature, index) => (
                         <div
                           key={index}
                           className="flex justify-between items-center p-3 bg-gray-100 rounded-md border border-gray-300 cursor-pointer hover:bg-gray-200 transition-colors"
-                          onClick={() => handleOpenFeaturedModal(featured, index)}
+                          onClick={() => handleOpenFeaturedModal(feature, index)}
                         >
-                          <span className="font-medium text-gray-800">{featured.heading}</span>
+                          <span className="font-medium text-gray-800">{feature.usp_heading}</span>
                           <button
                             onClick={(e) => handleDeleteFeatured(index, e)}
                             className="text-gray-600 hover:text-red-500 transition-colors duration-200"
@@ -450,13 +436,13 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                   className="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
                   onClick={() => handleOpenFeaturedModal()}
                 >
-                  Create Featured Item
+                  Create Feature
                 </button>
               </div>
             </div>
 
             {/* Navigation Buttons */}
-             <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+             {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
               <button
                 type="button"
                 onClick={handlePrevious}
@@ -471,7 +457,7 @@ const Services = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
               >
                 Next
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

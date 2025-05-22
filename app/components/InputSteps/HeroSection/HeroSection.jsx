@@ -1,38 +1,20 @@
 'use client';
-
 import { useState, useRef } from "react";
 import { InfoIcon, X } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
 import FieldCreationModal from './components/FieldCreationComponents'; // Adjust the path as needed
 
 const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-  // Local state for form handling
-  const [localFormData, setLocalFormData] = useState({
-    heading: formData.heading || "",
-    subHeading: formData.subHeading || "",
-    logoLink: formData.logoLink || "",
-    barOffer: formData.barOffer || "",
-    ratingProfileLink: formData.ratingProfileLink || "",
-    themeColor: formData.themeColor || "#E33C0C",
-    backgroundOpacity: formData.backgroundOpacity || 0.3,
-    rating: formData.rating || 4,
-    ratingSite: formData.ratingSite || "Google",
-    favicon: formData.favicon || null,
-    logo: formData.logo || null,
-    banner: formData.banner || null,
-    mobileBanner: formData.mobileBanner || null,
-    // Form Section states
-    formHeading: formData.formHeading || "",
-    formSubHeading: formData.formSubHeading || "",
-    thankYouHeading: formData.thankYouHeading || "",
-    thankYouDescription: formData.thankYouDescription || "",
-    formType: formData.formType || "default",
-  });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formFields, setFormFields] = useState([]);
 
-  // Add these handlers to your component
+  // Add these state variables near your other useState declarations
+  const [currentEditingField, setCurrentEditingField] = useState(null);
+  const [editingFieldIndex, setEditingFieldIndex] = useState(-1);
+
+  // Update your handleOpenModal function to reset editing state
   const handleOpenModal = () => {
+    setCurrentEditingField(null);
+    setEditingFieldIndex(-1);
     setIsModalOpen(true);
   };
 
@@ -40,9 +22,53 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     setIsModalOpen(false);
   };
 
+  // Add this new function to handle editing
+  const handleEditField = (field, index) => {
+    // Format dropdown_list items to simple array for the modal
+    let editField = { ...field };
+    if (field.dropdown_list && field.dropdown_list.length > 0) {
+      editField.dropdownItems = field.dropdown_list.map(item => item.item_name);
+    }
+
+    // Convert field Type to lowercase for the form select element
+    if (editField.Type === 'Full Name') editField.Type = 'fullname';
+    else if (editField.Type === 'Email') editField.Type = 'email';
+    else if (editField.Type === 'Phone') editField.Type = 'phone';
+    else if (editField.Type === 'Message') editField.Type = 'message';
+    else if (editField.Type === 'Service') editField.Type = 'service';
+    else if (editField.Type === 'Product') editField.Type = 'product';
+    else if (editField.Type === 'Consent') editField.Type = 'consent';
+
+    setCurrentEditingField(editField);
+    setEditingFieldIndex(index);
+    setIsModalOpen(true);
+  };
+
+  // Modify handleSaveField to handle both new and edited fields
   const handleSaveField = (fieldData) => {
-    setFormFields([...formFields, fieldData]);
+    const currentCustom = formData.custom || [];
+    
+    // If editing an existing field
+    if (editingFieldIndex >= 0) {
+      const updatedCustomFields = [...currentCustom];
+      updatedCustomFields[editingFieldIndex] = fieldData;
+
+      updateFormData({
+        ...formData,
+        custom: updatedCustomFields
+      });
+    }
+    // If adding a new field
+    else {
+      updateFormData({
+        ...formData,
+        custom: [...currentCustom, fieldData]
+      });
+    }
+
     setIsModalOpen(false);
+    setCurrentEditingField(null);
+    setEditingFieldIndex(-1);
   };
 
   // Refs for file inputs
@@ -56,14 +82,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     favicon: formData.favicon ? URL.createObjectURL(formData.favicon) : null,
     logo: formData.logo ? URL.createObjectURL(formData.logo) : null,
     banner: formData.banner ? URL.createObjectURL(formData.banner) : null,
-    mobileBanner: formData.mobileBanner ? URL.createObjectURL(formData.mobileBanner) : null,
+    mobile_banner: formData.mobile_banner ? URL.createObjectURL(formData.mobile_banner) : null,
   });
 
   // Handle text input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: value,
     });
   };
@@ -71,18 +97,17 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
   // Handle radio changes
   const handleRadioChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: value,
     });
   };
 
-
   // Handle range input changes
   const handleRangeChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [name]: parseFloat(value),
     });
   };
@@ -91,9 +116,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
   const handleFileUpload = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
-      // Update local form data with file
-      setLocalFormData({
-        ...localFormData,
+      // Update form data with file
+      updateFormData({
+        ...formData,
         [fieldName]: file,
       });
 
@@ -117,11 +142,11 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     if (fieldName === 'favicon') faviconInputRef.current.value = null;
     if (fieldName === 'logo') logoInputRef.current.value = null;
     if (fieldName === 'banner') bannerInputRef.current.value = null;
-    if (fieldName === 'mobileBanner') mobileBannerInputRef.current.value = null;
+    if (fieldName === 'mobile_banner') mobileBannerInputRef.current.value = null;
 
     // Update states
-    setLocalFormData({
-      ...localFormData,
+    updateFormData({
+      ...formData,
       [fieldName]: null,
     });
 
@@ -131,18 +156,25 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
   };
 
+  // Handle removing custom field 
+  const handleRemoveCustomField = (index) => {
+    const currentCustom = formData.custom || [];
+    const updatedCustomFields = [...currentCustom];
+    updatedCustomFields.splice(index, 1);
+    updateFormData({
+      ...formData,
+      custom: updatedCustomFields
+    });
+  };
+
   // Handle next button click
   const handleNext = () => {
-    // Update parent form data
-    updateFormData(localFormData);
     // Go to next step
     goToNextStep();
   };
 
   // Handle previous button click
   const handlePrevious = () => {
-    // Update parent form data before going back
-    updateFormData(localFormData);
     // Go to previous step
     goToPrevStep();
   };
@@ -183,7 +215,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 type="text"
                 id="heading"
                 name="heading"
-                value={localFormData.heading}
+                value={formData.heading || ""}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Catchy main headline"
@@ -192,14 +224,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Sub Heading field */}
             <div>
-              <label htmlFor="subHeading" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
                 Sub Heading
               </label>
               <input
                 type="text"
-                id="subHeading"
-                name="subHeading"
-                value={localFormData.subHeading}
+                id="sub_heading"
+                name="sub_heading"
+                value={formData.sub_heading || ""}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Supportive subtext here"
@@ -208,14 +240,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Logo Link field */}
             <div>
-              <label htmlFor="logoLink" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="logo_link" className="block text-sm font-medium text-gray-700 mb-1">
                 Logo Link
               </label>
               <input
                 type="text"
-                id="logoLink"
-                name="logoLink"
-                value={localFormData.logoLink}
+                id="logo_link"
+                name="logo_link"
+                value={formData.logo_link || ""}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Paste home page URL"
@@ -224,14 +256,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Bar Offer field */}
             <div>
-              <label htmlFor="barOffer" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bar_offer" className="block text-sm font-medium text-gray-700 mb-1">
                 Bar Offer
               </label>
               <input
                 type="text"
-                id="barOffer"
-                name="barOffer"
-                value={localFormData.barOffer}
+                id="bar_offer"
+                name="bar_offer"
+                value={formData.bar_offer || ""}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Short offer"
@@ -240,14 +272,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Rating Profile Link field */}
             <div>
-              <label htmlFor="ratingProfileLink" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="rating_profile_link" className="block text-sm font-medium text-gray-700 mb-1">
                 Rating Profile Link
               </label>
               <input
                 type="text"
-                id="ratingProfileLink"
-                name="ratingProfileLink"
-                value={localFormData.ratingProfileLink}
+                id="rating_profile_link"
+                name="rating_profile_link"
+                value={formData.rating_profile_link || ""}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Add rating link"
@@ -256,13 +288,13 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Rating Site dropdown */}
             <div>
-              <label htmlFor="ratingSite" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="rating_site" className="block text-sm font-medium text-gray-700 mb-1">
                 Rating Site
               </label>
               <select
-                id="ratingSite"
-                name="ratingSite"
-                value={localFormData.ratingSite}
+                id="rating_site"
+                name="rating_site"
+                value={formData.rating_site || "Google"}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
@@ -273,47 +305,23 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 ))}
               </select>
             </div>
-
-            {/* Theme Color field */}
-            {/* <div>
-              <label htmlFor="themeColor" className="block text-sm font-medium text-gray-700 mb-1">
-                Theme color
-              </label>
-              <div className="flex items-center">
-                <input
-                  type="color"
-                  id="themeColor"
-                  name="themeColor"
-                  value={localFormData.themeColor}
-                  onChange={handleInputChange}
-                  className="h-10 w-12 border-0 rounded-md cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={localFormData.themeColor.toUpperCase()}
-                  onChange={handleInputChange}
-                  name="themeColor"
-                  className="ml-2 flex-1 px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div> */}
           </div>
 
           {/* Range inputs */}
           <div className="mt-8 grid grid-cols-2 gap-6">
             {/* Background Opacity slider */}
             <div>
-              <label htmlFor="backgroundOpacity" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="background_opacity" className="block text-sm font-medium text-gray-700 mb-1">
                 Background Opacity
               </label>
               <input
                 type="range"
-                id="backgroundOpacity"
-                name="backgroundOpacity"
+                id="background_opacity"
+                name="background_opacity"
                 min="0"
                 max="1"
                 step="0.1"
-                value={localFormData.backgroundOpacity}
+                value={formData.background_opacity || 0.3}
                 onChange={handleRangeChange}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
@@ -331,7 +339,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 min="0"
                 max="5"
                 step="0.5"
-                value={localFormData.rating}
+                value={formData.rating || 4}
                 onChange={handleRangeChange}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
@@ -342,17 +350,11 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
           <div className="mt-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-semibold text-gray-800">Hero Form</h2>
-              {/* <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-              <span className="text-sm font-medium text-blue-600">2/10</span>
-              <div className="ml-2 w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-            </div> */}
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-
               {/*Grid 1  */}
               <div className="flex flex-col gap-6">
-
                 {/* Form Type radio group */}
                 <div className="col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -362,9 +364,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        name="formType"
+                        name="form_type"
                         value="default"
-                        checked={localFormData.formType === "default"}
+                        checked={(formData.form_type || "default") === "default"}
                         onChange={handleRadioChange}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                       />
@@ -373,9 +375,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        name="formType"
+                        name="form_type"
                         value="custom"
-                        checked={localFormData.formType === "custom"}
+                        checked={(formData.form_type || "default") === "custom"}
                         onChange={handleRadioChange}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                       />
@@ -386,14 +388,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
                 {/* Form Heading field */}
                 <div>
-                  <label htmlFor="formHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="form_heading" className="block text-sm font-medium text-gray-700 mb-1">
                     Form Heading
                   </label>
                   <input
                     type="text"
-                    id="formHeading"
-                    name="formHeading"
-                    value={localFormData.formHeading}
+                    id="form_heading"
+                    name="form_heading"
+                    value={formData.form_heading || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Eledent - Dental Implants Offer"
@@ -402,14 +404,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
                 {/* Form Sub Heading field */}
                 <div>
-                  <label htmlFor="formSubHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="form_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
                     Form Sub Heading
                   </label>
                   <input
                     type="text"
-                    id="formSubHeading"
-                    name="formSubHeading"
-                    value={localFormData.formSubHeading}
+                    id="form_sub_heading"
+                    name="form_sub_heading"
+                    value={formData.form_sub_heading || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="enquiry.eledenthospitals.com"
@@ -418,14 +420,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
                 {/* Thank you Heading field */}
                 <div>
-                  <label htmlFor="thankYouHeading" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="thank_you_heading" className="block text-sm font-medium text-gray-700 mb-1">
                     Thank you Heading
                   </label>
                   <input
                     type="text"
-                    id="thankYouHeading"
-                    name="thankYouHeading"
-                    value={localFormData.thankYouHeading}
+                    id="thank_you_heading"
+                    name="thank_you_heading"
+                    value={formData.thank_you_heading || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="dental-implants-offers"
@@ -434,68 +436,88 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
                 {/* Thank you Description field */}
                 <div className="col-span-1">
-                  <label htmlFor="thankYouDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="thank_you_description" className="block text-sm font-medium text-gray-700 mb-1">
                     Thank you Description
                   </label>
                   <input
                     type="text"
-                    id="thankYouDescription"
-                    name="thankYouDescription"
-                    value={localFormData.thankYouDescription}
+                    id="thank_you_description"
+                    name="thank_you_description"
+                    value={formData.thank_you_description || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="enquiry.eledenthospitals.com"
                   />
                 </div>
-
               </div>
 
-              {/* Grid 2 Create Fields */}
+              {/* Grid 2 Create Fields - Only show if form type is custom */}
               <div>
-                <div>
-                  <button
-                    onClick={handleOpenModal}
-                    className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-md transition-colors duration-200"
-                  >
-                    Create Field
-                  </button>
+                {(formData.form_type || "default") === "custom" && (
+                  <div>
+                    <button
+                      onClick={handleOpenModal}
+                      className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-md transition-colors duration-200"
+                    >
+                      Create Field
+                    </button>
 
-                  {/* Display the fields that have been created */}
-                  {formFields.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">Created Fields</h3>
-                      <div className="space-y-2">
-                        {formFields.map((field, index) => (
-                          <div key={index} className="p-2 bg-gray-100 rounded border border-gray-300">
-                            <p className="font-medium">{field.inputLabel}</p>
-                            <p className="text-xs text-gray-500">Type: {field.type}, Input Type: {field.inputType}</p>
-                          </div>
-                        ))}
+                    {/* Display the fields that have been created */}
+                    {formData.custom && formData.custom.length > 0 && (
+                      <div className="mt-4">
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">Created Fields</h3>
+                        <div className="space-y-2">
+                          {formData.custom.map((field, index) => (
+                            <div
+                              key={index}
+                              className="p-2 bg-gray-100 rounded border border-gray-300 flex justify-between items-center cursor-pointer"
+                              onClick={() => handleEditField(field, index)}
+                            >
+                              <div>
+                                <p className="font-medium">{field.input_label || field.Type}</p>
+                                <p className="text-xs text-gray-500">
+                                  Type: {field.Type},
+                                  Input Type: {field.input_type || "Input"},
+                                  Status: {field.status}
+                                </p>
+                                {field.dropdown_list && field.dropdown_list.length > 0 && (
+                                  <div className="mt-1">
+                                    <p className="text-xs text-gray-500">Options: {field.dropdown_list.map(item => item.item_name).join(', ')}</p>
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveCustomField(index);
+                                }}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Add the modal component */}
-                  <FieldCreationModal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    onSave={handleSaveField}
-                  />
-                </div>
+                    {/* Add the modal component */}
+                    <FieldCreationModal
+                      isOpen={isModalOpen}
+                      onClose={handleCloseModal}
+                      onSave={handleSaveField}
+                      editingField={currentEditingField}
+                    />
+                  </div>
+                )}
               </div>
-
-
-
-
             </div>
           </div>
 
-
-
           {/* Image upload section */}
-          <div className="mt-10 grid grid-cols-4 gap-4">
+          <div className="mt-10 grid grid-cols-4 gap-4 mb-10">
             {/* Favicon upload */}
-            {/* <div>
+            <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Favicon</p>
               <div className="flex flex-col">
                 {previews.favicon ? (
@@ -530,10 +552,10 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   onChange={(e) => handleFileUpload(e, 'favicon')}
                 />
               </div>
-            </div> */}
+            </div>
 
             {/* Logo upload */}
-            {/* <div>
+            <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Logo</p>
               <div className="flex flex-col">
                 {previews.logo ? (
@@ -568,7 +590,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   onChange={(e) => handleFileUpload(e, 'logo')}
                 />
               </div>
-            </div> */}
+            </div>
 
             {/* Banner upload */}
             <div>
@@ -612,15 +634,15 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Mobile Banner</p>
               <div className="flex flex-col">
-                {previews.mobileBanner ? (
+                {previews.mobile_banner ? (
                   <div className="relative mb-2">
                     <img
-                      src={previews.mobileBanner}
+                      src={previews.mobile_banner}
                       alt="Mobile Banner preview"
                       className="w-32 h-32 object-contain border rounded"
                     />
                     <button
-                      onClick={() => handleRemoveImage('mobileBanner')}
+                      onClick={() => handleRemoveImage('mobile_banner')}
                       className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
                     >
                       <X size={16} />
@@ -641,14 +663,14 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   ref={mobileBannerInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'mobileBanner')}
+                  onChange={(e) => handleFileUpload(e, 'mobile_banner')}
                 />
               </div>
             </div>
           </div>
 
           {/* Navigation Buttons */}
-          <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={handlePrevious}
@@ -663,7 +685,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             >
               Next
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

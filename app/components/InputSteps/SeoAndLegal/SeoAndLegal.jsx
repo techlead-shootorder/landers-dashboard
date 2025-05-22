@@ -1,25 +1,13 @@
 'use client';
 
-import { useState } from "react";
 import { InfoIcon } from "lucide-react";
 
 const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-    // Local state for SEO and Legal data
-    const [localFormData, setLocalFormData] = useState({
-        seoHeading: formData.seoHeading || "",
-        seoMetaDescription: formData.seoMetaDescription || "",
-        gtmId: formData.gtmId || "",
-        primary: formData.primary || "",
-        copyrightText: formData.copyrightText || "",
-        disclaimer: formData.disclaimer || "",
-        cookieEnabled: formData.cookieEnabled || false
-    });
-
     // Handle input changes for form fields
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setLocalFormData({
-            ...localFormData,
+        updateFormData({
+            ...formData,
             [name]: value
         });
     };
@@ -27,18 +15,17 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
     // Handle checkbox changes
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
-        setLocalFormData({
-            ...localFormData,
+        updateFormData({
+            ...formData,
             [name]: checked
         });
     };
 
     // Handle next button click
     const handleNext = () => {
-        // Update parent form data
-        updateFormData(localFormData);
         // Go to next step
-        goToNextStep();
+        console.log("formdata in seo", formData);
+        // goToNextStep();
     };
 
     // Visit landing page function
@@ -77,12 +64,12 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                         <div className="grid grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    SEO Heading
+                                    SEO Title
                                 </label>
                                 <input
                                     type="text"
-                                    name="seoHeading"
-                                    value={localFormData.seoHeading}
+                                    name="seo_title"
+                                    value={formData.seo_title || ""}
                                     onChange={handleInputChange}
                                     placeholder="Elodent - Dental Implants Offer"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
@@ -95,8 +82,8 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                 </label>
                                 <input
                                     type="text"
-                                    name="seoMetaDescription"
-                                    value={localFormData.seoMetaDescription}
+                                    name="seo_meta_description"
+                                    value={formData.seo_meta_description || ""}
                                     onChange={handleInputChange}
                                     placeholder="Elodent - Dental Implants Offer"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
@@ -104,35 +91,22 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                             </div>
                         </div>
 
-                        {/* GTM ID and Primary */}
+                        {/* GTM ID */}
                         <div className="grid grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Gtm Id
+                                    GTM ID
                                 </label>
                                 <input
                                     type="text"
-                                    name="gtmId"
-                                    value={localFormData.gtmId}
+                                    name="gtm_id"
+                                    value={formData.gtm_id || ""}
                                     onChange={handleInputChange}
-                                    placeholder="Elodent - Dental Implants Offer"
+                                    placeholder="GTM-XXXXXXX"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                                 />
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Primary
-                                </label>
-                                <input
-                                    type="text"
-                                    name="primary"
-                                    value={localFormData.primary}
-                                    onChange={handleInputChange}
-                                    placeholder="Elodent - Dental Implants Offer"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
-                                />
-                            </div>
+                            <div></div>
                         </div>
                     </div>
 
@@ -148,10 +122,10 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                 </label>
                                 <input
                                     type="text"
-                                    name="copyrightText"
-                                    value={localFormData.copyrightText}
+                                    name="copyright_text"
+                                    value={formData.copyright_text || ""}
                                     onChange={handleInputChange}
-                                    placeholder="Elodent - Dental Implants Offer"
+                                    placeholder="© 2024 Company Name. All rights reserved."
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                                 />
                             </div>
@@ -163,9 +137,9 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                 <input
                                     type="text"
                                     name="disclaimer"
-                                    value={localFormData.disclaimer}
+                                    value={formData.disclaimer || ""}
                                     onChange={handleInputChange}
-                                    placeholder="Elodent - Dental Implants Offer"
+                                    placeholder="Enter disclaimer text"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                                 />
                             </div>
@@ -176,8 +150,8 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                             <label className="flex items-center text-sm font-medium text-gray-700">
                                 <input
                                     type="checkbox"
-                                    name="cookieEnabled"
-                                    checked={localFormData.cookieEnabled}
+                                    name="cookie"
+                                    checked={formData.cookie || false}
                                     onChange={handleCheckboxChange}
                                     className="mr-2 h-5 w-5 rounded border-gray-300 text-rose-500 focus:ring-rose-500"
                                 />
@@ -186,7 +160,7 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                         </div>
 
                         {/* Fixed Navigation Bar at Bottom */}
-                        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg py-4 px-12 z-20">
+                        {/* <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg py-4 px-12 z-20">
                             <div className="flex justify-between max-w-full">
                                 <div>
                                     <button
@@ -214,12 +188,10 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

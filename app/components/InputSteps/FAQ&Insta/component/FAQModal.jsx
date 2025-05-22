@@ -4,7 +4,8 @@ const FAQModal = ({ isFaqModalOpen, editingIndex, closeFaqModal, saveFaq, faqFor
   if (!isFaqModalOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-end z-50">
+    <div className="fixed inset-0 flex items-start justify-end z-50">
+       <div className=' bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
       <div className="bg-[#121621] h-full overflow-y-auto shadow-xl w-full max-w-md transform transition-transform duration-500 ease-out translate-x-0">
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700 sticky top-0 bg-[#121621] z-10">
           <h3 className="text-lg font-medium text-white">

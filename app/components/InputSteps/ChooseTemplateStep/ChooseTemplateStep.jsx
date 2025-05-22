@@ -1,14 +1,9 @@
 'use client';
 
-import { useState, useRef } from "react";
 import { InfoIcon, X } from "lucide-react";
-import { LuUpload } from "react-icons/lu";
-
 
 const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
-  // Local state for template selection
-  const [selectedTemplate, setSelectedTemplate] = useState(formData.selectedTemplate || null);
-  const [selectedColor, setSelectedColor] = useState(formData.themeColor || "#3B82F6"); // Default blue
+  console.log("current form data", formData);
 
   // Template options
   const templates = [
@@ -17,77 +12,27 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
     { id: 3, name: "Theme 3", image: "/api/placeholder/300/200", description: "Elegant and sophisticated layout for premium brands" },
   ];
 
-  const faviconInputRef = useRef(null);
-  const logoInputRef = useRef(null);
-
-  const [previews, setPreviews] = useState({
-    favicon: formData.favicon ? URL.createObjectURL(formData.favicon) : null,
-    logo: formData.logo ? URL.createObjectURL(formData.logo) : null
-  })
-
-  // Handle file uploads
-  const handleFileUpload = (e, fieldName) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Update local form data with file
-      // setLocalFormData({
-      //   ...localFormData,
-      //   [fieldName]: file,
-      // });
-
-      // Create and store preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setPreviews({
-        ...previews,
-        [fieldName]: previewUrl,
-      });
-    }
-  };
-
-  // Handle removing uploaded images
-  const handleRemoveImage = (fieldName) => {
-    // Revoke the object URL to avoid memory leaks
-    if (previews[fieldName]) {
-      URL.revokeObjectURL(previews[fieldName]);
-    }
-
-    // Reset the file input
-    if (fieldName === 'favicon') faviconInputRef.current.value = null;
-    if (fieldName === 'logo') logoInputRef.current.value = null;
-    if (fieldName === 'banner') bannerInputRef.current.value = null;
-    if (fieldName === 'mobileBanner') mobileBannerInputRef.current.value = null;
-
-    // Update states
-    // setLocalFormData({
-    //   ...localFormData,
-    //   [fieldName]: null,
-    // });
-
-    setPreviews({
-      ...previews,
-      [fieldName]: null,
-    });
-  };
-
   // Handle template selection
   const handleTemplateSelect = (templateId) => {
-    setSelectedTemplate(templateId);
+    updateFormData({
+      ...formData,
+      theme: templateId
+    });
   };
 
   // Handle color change
   const handleColorChange = (e) => {
-    setSelectedColor(e.target.value);
+    updateFormData({
+      ...formData,
+      theme_color: e.target.value
+    });
   };
 
   // Handle next button click
   const handleNext = () => {
-    if (selectedTemplate) {
-      // Update parent form data
-      updateFormData({
-        selectedTemplate,
-        themeColor: selectedColor
-      });
-      // Go to next step
+ 
+    if (formData.theme) {
+    //   // Go to next step
       goToNextStep();
     }
   };
@@ -125,7 +70,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
                   onClick={() => handleTemplateSelect(template.id)}
                   className={`
                     relative rounded-lg overflow-hidden border-2 cursor-pointer transition-all
-                    ${selectedTemplate === template.id
+                    ${formData.theme === template.id
                       ? 'border-rose-500 shadow-lg transform scale-105'
                       : 'border-gray-200 hover:border-gray-300'
                     }
@@ -147,7 +92,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
                   </div>
 
                   {/* Selection Indicator */}
-                  {selectedTemplate === template.id && (
+                  {formData.theme === template.id && (
                     <div className="absolute top-2 right-2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -165,100 +110,20 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
             <div className="flex items-center gap-4">
               <input
                 type="color"
-                id="themeColor"
-                value={selectedColor}
+                id="theme_color"
+                value={formData.theme_color || "#3B82F6"}
                 onChange={handleColorChange}
                 className="w-12 h-12 border-0 rounded-md cursor-pointer"
               />
               <div>
-                <p className="text-gray-700">Selected Color: <span className="font-medium">{selectedColor}</span></p>
+                <p className="text-gray-700">Selected Color: <span className="font-medium">{formData.theme_color || "#3B82F6"}</span></p>
                 <p className="text-sm text-gray-500">This color will be used as the primary color throughout your landing page.</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-4 gap-4">
-            {/* Favicon upload */}
-            <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Favicon</p>
-              <div className="flex flex-col">
-                {previews.favicon ? (
-                  <div className="relative mb-2">
-                    <img
-                      src={previews.favicon}
-                      alt="Favicon preview"
-                      className="w-32 h-32 object-contain border rounded"
-                    />
-                    <button
-                      onClick={() => handleRemoveImage('favicon')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => faviconInputRef.current.click()}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
-                  >
-                    <LuUpload className="font-bold" />
-                    Upload Document
-                  </button>
-                )}
-                <input
-                  type="file"
-                  ref={faviconInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'favicon')}
-                />
-              </div>
-            </div>
-
-            {/* Logo upload */}
-            <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Logo</p>
-              <div className="flex flex-col">
-                {previews.logo ? (
-                  <div className="relative mb-2">
-                    <img
-                      src={previews.logo}
-                      alt="Logo preview"
-                      className="w-32 h-32 object-contain border rounded"
-                    />
-                    <button
-                      onClick={() => handleRemoveImage('logo')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => logoInputRef.current.click()}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
-                  >
-                    <LuUpload className="font-bold" />
-                    Upload Document
-                  </button>
-                )}
-                <input
-                  type="file"
-                  ref={logoInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'logo')}
-                />
-              </div>
-            </div>
-          </div>
-
-
-
           {/* Navigation Buttons */}
-           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+           {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={goToPrevStep}
@@ -269,15 +134,15 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
             <button
               type="button"
               onClick={handleNext}
-              disabled={!selectedTemplate}
-              className={`px-8 py-2 rounded-md font-medium transition-colors duration-200 ${selectedTemplate
+              disabled={!formData.theme}
+              className={`px-8 py-2 rounded-md font-medium transition-colors duration-200 ${formData.theme
                   ? 'bg-rose-500 hover:bg-rose-600 text-white'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               Next
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

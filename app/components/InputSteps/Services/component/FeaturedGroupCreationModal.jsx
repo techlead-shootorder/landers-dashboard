@@ -3,11 +3,11 @@ import { X } from 'lucide-react';
 
 const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }) => {
   const [featuredData, setFeaturedData] = useState({
-    heading: '',
-    content: '',
-    icon: '',
-    iconUrl: '',
-    hasCover: false
+    usp_heading: '',
+    usp_content: '',
+    usp_icon: '',
+    usp_icon_url: '',
+    cover: false
   });
   
   // Animation states
@@ -20,16 +20,22 @@ const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }
       
       // If editData is provided, populate the form for editing
       if (editData) {
-        setFeaturedData(editData);
+        setFeaturedData({
+          usp_heading: editData.usp_heading || '',
+          usp_content: editData.usp_content || '',
+          usp_icon: editData.usp_icon || '',
+          usp_icon_url: editData.usp_icon_url || '',
+          cover: editData.cover || false
+        });
         setIsEditMode(true);
       } else {
         // Reset form for create mode
         setFeaturedData({
-          heading: '',
-          content: '',
-          icon: '',
-          iconUrl: '',
-          hasCover: false
+          usp_heading: '',
+          usp_content: '',
+          usp_icon: '',
+          usp_icon_url: '',
+          cover: false
         });
         setIsEditMode(false);
       }
@@ -59,11 +65,12 @@ const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }
   };
   
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-start justify-end z-50 transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`fixed inset-0  flex items-start justify-end z-50 transition-opacity duration-300`}>
+       <div className=' bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
       <div className={`bg-white h-full overflow-y-auto shadow-xl w-full max-w-md transform transition-transform duration-500 ease-out ${isAnimating ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <h3 className="text-lg font-medium text-gray-800">
-            {isEditMode ? 'Edit Featured Item' : 'Create New Featured Item'}
+            {isEditMode ? 'Edit Feature' : 'Create New Feature'}
           </h3>
           <button
             onClick={handleCloseWithAnimation}
@@ -75,54 +82,54 @@ const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }
         
         <div className="p-6 space-y-6">
           <div className="space-y-6">
-            {/* Heading */}
+            {/* Feature Heading */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Featured Heading</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Feature Heading</label>
               <input
                 type="text"
-                name="heading"
-                value={featuredData.heading}
+                name="usp_heading"
+                value={featuredData.usp_heading}
                 onChange={handleInputChange}
-                placeholder="Enter featured heading"
+                placeholder="Enter feature heading"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
             
-            {/* Content */}
+            {/* Feature Content */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Featured Content</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Feature Content</label>
               <textarea
-                name="content"
-                value={featuredData.content}
+                name="usp_content"
+                value={featuredData.usp_content}
                 onChange={handleInputChange}
-                placeholder="Enter featured content"
+                placeholder="Enter feature content"
                 rows="4"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               ></textarea>
             </div>
             
-            {/* Icon */}
+            {/* Feature Icon */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Featured Icon</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Feature Icon</label>
               <input
                 type="text"
-                name="icon"
-                value={featuredData.icon}
+                name="usp_icon"
+                value={featuredData.usp_icon}
                 onChange={handleInputChange}
                 placeholder="Enter icon name"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
             
-            {/* Icon URL */}
+            {/* Feature Icon URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Featured Icon URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Feature Icon URL</label>
               <input
                 type="text"
-                name="iconUrl"
-                value={featuredData.iconUrl}
+                name="usp_icon_url"
+                value={featuredData.usp_icon_url}
                 onChange={handleInputChange}
-                placeholder="Enter featured icon URL"
+                placeholder="Enter feature icon URL"
                 className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-500 focus:border-transparent"
               />
             </div>
@@ -132,12 +139,12 @@ const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  name="hasCover"
-                  checked={featuredData.hasCover}
+                  name="cover"
+                  checked={featuredData.cover}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500"
                 />
-                <span className="text-sm text-gray-700">Has Cover</span>
+                <span className="text-sm text-gray-700">Cover Feature</span>
               </label>
             </div>
           </div>
@@ -154,7 +161,7 @@ const FeaturedGroupCreationModal = ({ isOpen, onClose, onSave, editData = null }
             onClick={handleSave}
             className="px-4 py-2 bg-rose-500 text-white font-medium rounded-md hover:bg-rose-600 transition-colors duration-200 focus:outline-none"
           >
-            {isEditMode ? 'Update Featured Item' : 'Create Featured Item'}
+            {isEditMode ? 'Update Feature' : 'Create Feature'}
           </button>
         </div>
       </div>
