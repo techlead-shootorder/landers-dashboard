@@ -169,6 +169,7 @@ const page = () => {
                     <ThankYou
                         formData={formData}
                         goToPrevStep={goToPrevStep}
+                        pageId={pageId}
                     />
                 );
             default:
