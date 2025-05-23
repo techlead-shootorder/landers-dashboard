@@ -353,6 +353,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
               <label htmlFor="background_opacity" className="block text-sm font-medium text-gray-700 mb-1">
                 Background Opacity
               </label>
+              <div className="flex gap-2 items-center">
               <input
                 type="range"
                 id="background_opacity"
@@ -364,6 +365,8 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 onChange={handleRangeChange}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
+              <span className="text-md text-gray-700 ">{formData.background_opacity}</span>
+              </div>
             </div>
 
             {/* Rating slider */}
@@ -371,6 +374,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
               <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-1">
                 Rating
               </label>
+               <div className="flex gap-2 items-center">
               <input
                 type="range"
                 id="rating"
@@ -382,6 +386,8 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 onChange={handleRangeChange}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
+               <span className="text-md text-gray-700 ">{formData.rating}</span>
+               </div>
             </div>
           </div>
 
@@ -570,7 +576,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     <button
                       type="button"
                       onClick={() => handleRemoveImage('banner')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 left-[117] bg-red-500 text-white rounded-full p-1"
                       disabled={uploadLoading.banner}
                     >
                       <X size={16} />
@@ -616,7 +622,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     <button
                       type="button"
                       onClick={() => handleRemoveImage('mobile_banner')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 left-[117] bg-red-500 text-white rounded-full p-1"
                       disabled={uploadLoading.mobile_banner}
                     >
                       <X size={16} />

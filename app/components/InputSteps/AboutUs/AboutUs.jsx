@@ -314,7 +314,7 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                       <button
                         type="button"
                         onClick={() => handleRemoveImage('about_us_image')}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        className="absolute -top-2 left-[117] bg-red-500 text-white rounded-full p-1"
                         disabled={uploadLoading}
                       >
                         <X size={16} />

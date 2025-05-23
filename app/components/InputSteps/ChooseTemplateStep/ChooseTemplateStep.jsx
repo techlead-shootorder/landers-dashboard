@@ -139,14 +139,19 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
     <div className="flex flex-col h-[88vh]">
       {/* Left sidebar for title and tooltip */}
       <div className="flex flex-1">
-        <div className="w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+        <div className="w-1/3 bg-pink-50 p-12 flex flex-col justify-between fixed h-[88vh] overflow-hidden">
+          {/* Empty div for spacing */}
+          <div></div>
+          
+          {/* Centered heading */}
+          <div className="flex-1 flex items-center justify-center">
+            <h1 className="text-4xl font-bold text-gray-800">
               Choose Your Template
             </h1>
           </div>
 
-          <div className="flex items-start mb-8">
+          {/* Tooltip at bottom */}
+          <div className="flex items-start">
             <InfoIcon className="w-6 h-6 mr-2 text-gray-500 flex-shrink-0" />
             <p className="text-sm text-gray-600">
               Tip: Select a template that best represents your brand. You can customize colors and content in the next steps.
@@ -155,7 +160,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
         </div>
 
         {/* Main content area */}
-        <div className="w-2/3 bg-white p-12 relative overflow-y-auto">
+        <div className="w-2/3 bg-white p-12 relative overflow-y-auto ml-[33.333333%]">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Choose Template</h2>
 
           {/* Template Selection */}
@@ -238,7 +243,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
                       <button
                         type="button"
                         onClick={() => handleRemoveImage('favicon')}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        className="absolute -top-2 left-[117] bg-red-500 text-white rounded-full p-1"
                         disabled={uploadLoading.favicon}
                       >
                         <X size={16} />
@@ -284,7 +289,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
                       <button
                         type="button"
                         onClick={() => handleRemoveImage('logo')}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        className="absolute -top-2 left-[117] bg-red-500 text-white rounded-full p-1"
                         disabled={uploadLoading.logo}
                       >
                         <X size={16} />

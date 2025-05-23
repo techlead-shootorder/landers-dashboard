@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from "react";
-import { InfoIcon, Loader2 } from "lucide-react";
+import { InfoIcon, Loader2, Trash } from "lucide-react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
+import AddressCreationModal from "./component/AddressCreationModal";
 
 const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
   // Local state for form handling with updated key names
@@ -15,12 +16,19 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
     email: formData.email || "",
     phone: formData.phone || "",
     whatsapp_number: formData.whatsapp_number || "",
+    address_section_heading: formData.address_section_heading || "",
+    address_section_sub_heading: formData.address_section_sub_heading || "",
+    addresses: formData.addresses || [],
   });
 
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Address modal states
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   const router = useRouter();
 
@@ -34,6 +42,53 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
     
     // Clear error when user starts typing
     if (error) setError('');
+  };
+
+  // ADDRESS MODAL HANDLERS
+  const handleOpenAddressModal = (address = null, index = null) => {
+    if (address) {
+      setEditingAddress({ ...address, index });
+    } else {
+      setEditingAddress(null);
+    }
+    setAddressModalOpen(true);
+  };
+
+  const handleCloseAddressModal = () => {
+    setAddressModalOpen(false);
+    setEditingAddress(null);
+  };
+
+  // ADDRESS SAVE HANDLER
+  const handleSaveAddress = (addressData, isEditMode) => {
+    const currentAddresses = localFormData.addresses || [];
+
+    if (isEditMode && editingAddress !== null && typeof editingAddress.index === 'number') {
+      const updatedAddresses = [...currentAddresses];
+      updatedAddresses[editingAddress.index] = addressData;
+      setLocalFormData({
+        ...localFormData,
+        addresses: updatedAddresses
+      });
+    } else {
+      const updatedAddresses = [...currentAddresses, addressData];
+      setLocalFormData({
+        ...localFormData,
+        addresses: updatedAddresses
+      });
+    }
+    handleCloseAddressModal();
+  };
+
+  const handleDeleteAddress = (index, event) => {
+    event.stopPropagation();
+    const currentAddresses = localFormData.addresses || [];
+    const updatedAddresses = [...currentAddresses];
+    updatedAddresses.splice(index, 1);
+    setLocalFormData({
+      ...localFormData,
+      addresses: updatedAddresses
+    });
   };
 
   // Validate form data
@@ -84,6 +139,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
   // Handle next button click
   const handleNext = async () => {
     // Clear previous messages
+    
     setError('');
     setSuccess('');
 
@@ -134,7 +190,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
       <div className="flex flex-1">
         <div className="relative w-1/3 bg-pink-50 p-12 flex flex-col justify-between">
           <div className="flex items-center h-full">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 absolute top-[300]">
               Laying the First Brick of Your Funnel
             </h1>
           </div>
@@ -148,7 +204,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
         </div>
 
         {/* Main content area */}
-        <div className="w-2/3 bg-white p-12 relative">
+        <div className="w-2/3 bg-white p-12 relative overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Details</h2>
           
           {/* Error Message */}
@@ -165,7 +221,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
             </div>
           )}
           
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 mb-8">
             {/* Name field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -271,16 +327,88 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
               />
             </div>
           </div>
+
+          {/* ADDRESS SECTION */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">Address Section</h3>
+            
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              {/* Address Section Heading */}
+              <div>
+                <label htmlFor="address_section_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                  Address Section Heading
+                </label>
+                <input
+                  type="text"
+                  id="address_section_heading"
+                  name="address_section_heading"
+                  value={localFormData.address_section_heading}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Address Heading"
+                />
+              </div>
+
+              {/* Address Section Sub Heading */}
+              <div>
+                <label htmlFor="address_section_sub_heading" className="block text-sm font-medium text-gray-700 mb-1">
+                  Address Section Sub Heading
+                </label>
+                <input
+                  type="text"
+                  id="address_section_sub_heading"
+                  name="address_section_sub_heading"
+                  value={localFormData.address_section_sub_heading}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Address Sub-Heading"
+                />
+              </div>
+            </div>
+
+            {/* Address list */}
+            {(localFormData.addresses || []).length > 0 && (
+              <div className="mt-4 mb-6">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Created Addresses</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {(localFormData.addresses || []).map((address, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 bg-gray-100 rounded-md border border-gray-300 cursor-pointer hover:bg-gray-200 transition-colors"
+                      onClick={() => handleOpenAddressModal(address, index)}
+                    >
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-800">{address.address}</span>
+                        <p className="text-sm text-gray-600">{address.city}, {address.state}</p>
+                      </div>
+                      <button
+                        onClick={(e) => handleDeleteAddress(index, e)}
+                        className="text-gray-600 hover:text-red-500 transition-colors duration-200"
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Create Address Button */}
+            <div className="mb-6">
+              <button
+                className="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-md transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                onClick={() => handleOpenAddressModal()}
+                disabled={isLoading}
+              >
+                Create Address
+              </button>
+            </div>
+          </div>
           
           {/* Navigation Buttons */}
           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
-            {/* <button
-              type="button"
-              disabled={isLoading}
-              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button> */}
             <button
               type="button"
               onClick={handleNext}
@@ -293,6 +421,16 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
           </div>
         </div>
       </div>
+
+      {/* Address Creation Modal */}
+      {addressModalOpen && (
+        <AddressCreationModal
+          isOpen={addressModalOpen}
+          onClose={handleCloseAddressModal}
+          onSave={handleSaveAddress}
+          editData={editingAddress}
+        />
+      )}
     </div>
   );
 };
