@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useRef } from "react";
-import { InfoIcon, X, Trash2 } from "lucide-react";
+import { InfoIcon, X, Trash2, Loader2 } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
 
 const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   const bannerInputRef = useRef(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const [previews, setPreviews] = useState({
-    about_us_image: formData.about_us_image ? URL.createObjectURL(formData.about_us_image) : null,
+    about_us_image: formData.about_us_image ? 
+      (typeof formData.about_us_image === 'string' ? 
+        `https://app.shootorder.com/assets/${formData.about_us_image}` : 
+        URL.createObjectURL(formData.about_us_image)) : null,
   });
 
   // Handle adding a new highlight
@@ -61,29 +65,58 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
     });
   };
 
-  // Handle file uploads
-  const handleFileUpload = (e, fieldName) => {
+  // Handle image upload
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Update form data with file
-      updateFormData({
-        ...formData,
-        [fieldName]: file,
+    if (!file) return;
+
+    setUploadLoading(true);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/uploadImage', {
+        method: 'POST',
+        body: uploadFormData,
       });
 
-      // Create and store preview URL
-      const previewUrl = URL.createObjectURL(file);
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const result = await response.json();
+      console.log('Upload Image result:', result);
+
+
+
+      // Update form data with the image ID
+      updateFormData({
+        ...formData,
+        about_us_image: result?.data?.id,
+      });
+
+      // Set preview URL
       setPreviews({
         ...previews,
-        [fieldName]: previewUrl,
+        about_us_image: `https://app.shootorder.com/assets/${result?.data?.id}`,
       });
+
+      // Success notification could be added here
+      console.log('Image uploaded successfully');
+
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadLoading(false);
     }
   };
 
   // Handle removing uploaded images
   const handleRemoveImage = (fieldName) => {
-    // Revoke the object URL to avoid memory leaks
-    if (previews[fieldName]) {
+    // Revoke the object URL to avoid memory leaks (only if it's a blob URL)
+    if (previews[fieldName] && previews[fieldName].startsWith('blob:')) {
       URL.revokeObjectURL(previews[fieldName]);
     }
 
@@ -104,7 +137,6 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
 
   // Handle next button click
   const handleNext = () => {
-   
     goToNextStep();
   };
 
@@ -276,13 +308,14 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                     <div className="relative mb-2">
                       <img
                         src={previews.about_us_image}
-                        alt="Banner preview"
-                        className="w-32 h-32 object-contain border rounded"
+                        alt="About Us preview"
+                        className="w-32 h-32 object-cover border rounded"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage('about_us_image')}
-                        className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        disabled={uploadLoading}
                       >
                         <X size={16} />
                       </button>
@@ -291,10 +324,15 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                     <button
                       type="button"
                       onClick={() => bannerInputRef.current.click()}
-                      className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
+                      disabled={uploadLoading}
+                      className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
                     >
-                      <LuUpload className="font-bold" />
-                      Upload Document
+                      {uploadLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <LuUpload className="font-bold" />
+                      )}
+                      {uploadLoading ? 'Uploading...' : 'Upload Image'}
                     </button>
                   )}
                   <input
@@ -302,30 +340,13 @@ const AboutUs = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
                     ref={bannerInputRef}
                     className="hidden"
                     accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'about_us_image')}
+                    onChange={handleImageUpload}
+                    disabled={uploadLoading}
                   />
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Navigation Buttons */}
-           {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              Next
-            </button>
-          </div> */}
         </div>
       </div>
     </div>

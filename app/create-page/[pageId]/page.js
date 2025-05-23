@@ -207,6 +207,8 @@ const page = () => {
     };
 
     const handleNext = async () => {
+    console.log("formData, uploading after image upload", formData);
+    
     const success = await handleUpdateData(formData);
     if (success) {
         goToNextStep();

@@ -1,9 +1,33 @@
 'use client';
 
-import { InfoIcon, X } from "lucide-react";
+import { useState, useRef } from "react";
+import { InfoIcon, X, Loader2 } from "lucide-react";
+import { LuUpload } from "react-icons/lu";
 
 const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
   console.log("current form data", formData);
+
+  // Refs for file inputs
+  const faviconInputRef = useRef(null);
+  const logoInputRef = useRef(null);
+
+  // Upload loading states
+  const [uploadLoading, setUploadLoading] = useState({
+    favicon: false,
+    logo: false
+  });
+
+  // Image preview states
+  const [previews, setPreviews] = useState({
+    favicon: formData.favicon ? 
+      (typeof formData.favicon === 'string' ? 
+        `https://app.shootorder.com/assets/${formData.favicon}` : 
+        URL.createObjectURL(formData.favicon)) : null,
+    logo: formData.logo ? 
+      (typeof formData.logo === 'string' ? 
+        `https://app.shootorder.com/assets/${formData.logo}` : 
+        URL.createObjectURL(formData.logo)) : null,
+  });
 
   // Template options
   const templates = [
@@ -28,11 +52,85 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
     });
   };
 
+  // Handle image upload
+  const handleImageUpload = async (e, fieldName) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadLoading(prev => ({
+      ...prev,
+      [fieldName]: true
+    }));
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/uploadImage', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const result = await response.json();
+      console.log(`Upload ${fieldName} result:`, result);
+
+      // Update form data with the image ID
+      updateFormData({
+        ...formData,
+        [fieldName]: result?.data?.id,
+      });
+
+      // Set preview URL
+      setPreviews(prev => ({
+        ...prev,
+        [fieldName]: `https://app.shootorder.com/assets/${result?.data?.id}`,
+      }));
+
+      // Success notification could be added here
+      console.log(`${fieldName} uploaded successfully`);
+
+    } catch (error) {
+      console.error(`Error uploading ${fieldName}:`, error);
+      alert(`Failed to upload ${fieldName}. Please try again.`);
+    } finally {
+      setUploadLoading(prev => ({
+        ...prev,
+        [fieldName]: false
+      }));
+    }
+  };
+
+  // Handle removing uploaded images
+  const handleRemoveImage = (fieldName) => {
+    // Revoke the object URL to avoid memory leaks (only if it's a blob URL)
+    if (previews[fieldName] && previews[fieldName].startsWith('blob:')) {
+      URL.revokeObjectURL(previews[fieldName]);
+    }
+
+    // Reset the file input
+    if (fieldName === 'favicon') faviconInputRef.current.value = null;
+    if (fieldName === 'logo') logoInputRef.current.value = null;
+
+    // Update states
+    updateFormData({
+      ...formData,
+      [fieldName]: null,
+    });
+
+    setPreviews({
+      ...previews,
+      [fieldName]: null,
+    });
+  };
+
   // Handle next button click
   const handleNext = () => {
- 
     if (formData.theme) {
-    //   // Go to next step
+      // Go to next step
       goToNextStep();
     }
   };
@@ -57,7 +155,7 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
         </div>
 
         {/* Main content area */}
-        <div className="w-2/3 bg-white p-12 relative">
+        <div className="w-2/3 bg-white p-12 relative overflow-y-auto">
           <h2 className="text-2xl font-semibold text-gray-800 mb-8">Choose Template</h2>
 
           {/* Template Selection */}
@@ -122,8 +220,106 @@ const ChooseTemplateStep = ({ formData, updateFormData, goToNextStep, goToPrevSt
             </div>
           </div>
 
-          {/* Navigation Buttons */}
-           {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+          {/* Image upload section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Upload Brand Assets</h3>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Favicon upload */}
+              <div>
+                <p className="block text-sm font-medium text-gray-700 mb-2">Favicon</p>
+                <div className="flex flex-col">
+                  {previews.favicon ? (
+                    <div className="relative mb-2">
+                      <img
+                        src={previews.favicon}
+                        alt="Favicon preview"
+                        className="w-32 h-32 object-contain border rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('favicon')}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        disabled={uploadLoading.favicon}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => faviconInputRef.current.click()}
+                      disabled={uploadLoading.favicon}
+                      className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
+                    >
+                      {uploadLoading.favicon ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <LuUpload className="font-bold" />
+                      )}
+                      {uploadLoading.favicon ? 'Uploading...' : 'Upload Favicon'}
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    ref={faviconInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'favicon')}
+                    disabled={uploadLoading.favicon}
+                  />
+                </div>
+              </div>
+
+              {/* Logo upload */}
+              <div>
+                <p className="block text-sm font-medium text-gray-700 mb-2">Logo</p>
+                <div className="flex flex-col">
+                  {previews.logo ? (
+                    <div className="relative mb-2">
+                      <img
+                        src={previews.logo}
+                        alt="Logo preview"
+                        className="w-32 h-32 object-contain border rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('logo')}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        disabled={uploadLoading.logo}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current.click()}
+                      disabled={uploadLoading.logo}
+                      className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
+                    >
+                      {uploadLoading.logo ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <LuUpload className="font-bold" />
+                      )}
+                      {uploadLoading.logo ? 'Uploading...' : 'Upload Logo'}
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    ref={logoInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'logo')}
+                    disabled={uploadLoading.logo}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Buttons - Commented out as requested */}
+          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={goToPrevStep}

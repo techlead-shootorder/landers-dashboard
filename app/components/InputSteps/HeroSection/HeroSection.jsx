@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef } from "react";
-import { InfoIcon, X } from "lucide-react";
+import { InfoIcon, X, Loader2 } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
 import FieldCreationModal from './components/FieldCreationComponents'; // Adjust the path as needed
 
@@ -10,6 +10,28 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
   // Add these state variables near your other useState declarations
   const [currentEditingField, setCurrentEditingField] = useState(null);
   const [editingFieldIndex, setEditingFieldIndex] = useState(-1);
+
+  // Refs for file inputs
+  const bannerInputRef = useRef(null);
+  const mobileBannerInputRef = useRef(null);
+
+  // Upload loading states
+  const [uploadLoading, setUploadLoading] = useState({
+    banner: false,
+    mobile_banner: false
+  });
+
+  // Image preview states
+  const [previews, setPreviews] = useState({
+    banner: formData.banner ? 
+      (typeof formData.banner === 'string' ? 
+        `https://app.shootorder.com/assets/${formData.banner}` : 
+        URL.createObjectURL(formData.banner)) : null,
+    mobile_banner: formData.mobile_banner ? 
+      (typeof formData.mobile_banner === 'string' ? 
+        `https://app.shootorder.com/assets/${formData.mobile_banner}` : 
+        URL.createObjectURL(formData.mobile_banner)) : null,
+  });
 
   // Update your handleOpenModal function to reset editing state
   const handleOpenModal = () => {
@@ -47,7 +69,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
   // Modify handleSaveField to handle both new and edited fields
   const handleSaveField = (fieldData) => {
     const currentCustom = formData.custom || [];
-    
+
     // If editing an existing field
     if (editingFieldIndex >= 0) {
       const updatedCustomFields = [...currentCustom];
@@ -70,20 +92,6 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     setCurrentEditingField(null);
     setEditingFieldIndex(-1);
   };
-
-  // Refs for file inputs
-  const faviconInputRef = useRef(null);
-  const logoInputRef = useRef(null);
-  const bannerInputRef = useRef(null);
-  const mobileBannerInputRef = useRef(null);
-
-  // Image preview states
-  const [previews, setPreviews] = useState({
-    favicon: formData.favicon ? URL.createObjectURL(formData.favicon) : null,
-    logo: formData.logo ? URL.createObjectURL(formData.logo) : null,
-    banner: formData.banner ? URL.createObjectURL(formData.banner) : null,
-    mobile_banner: formData.mobile_banner ? URL.createObjectURL(formData.mobile_banner) : null,
-  });
 
   // Handle text input changes
   const handleInputChange = (e) => {
@@ -112,35 +120,66 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
   };
 
-  // Handle file uploads
-  const handleFileUpload = (e, fieldName) => {
+  // Handle image upload
+  const handleImageUpload = async (e, fieldName) => {
     const file = e.target.files[0];
-    if (file) {
-      // Update form data with file
-      updateFormData({
-        ...formData,
-        [fieldName]: file,
+    if (!file) return;
+
+    setUploadLoading(prev => ({
+      ...prev,
+      [fieldName]: true
+    }));
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/uploadImage', {
+        method: 'POST',
+        body: uploadFormData,
       });
 
-      // Create and store preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setPreviews({
-        ...previews,
-        [fieldName]: previewUrl,
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const result = await response.json();
+      console.log(`Upload ${fieldName} result:`, result);
+
+      // Update form data with the image ID
+      updateFormData({
+        ...formData,
+        [fieldName]: result?.data?.id,
       });
+
+      // Set preview URL
+      setPreviews(prev => ({
+        ...prev,
+        [fieldName]: `https://app.shootorder.com/assets/${result?.data?.id}`,
+      }));
+
+      // Success notification could be added here
+      console.log(`${fieldName} uploaded successfully`);
+
+    } catch (error) {
+      console.error(`Error uploading ${fieldName}:`, error);
+      alert(`Failed to upload ${fieldName}. Please try again.`);
+    } finally {
+      setUploadLoading(prev => ({
+        ...prev,
+        [fieldName]: false
+      }));
     }
   };
 
   // Handle removing uploaded images
   const handleRemoveImage = (fieldName) => {
-    // Revoke the object URL to avoid memory leaks
-    if (previews[fieldName]) {
+    // Revoke the object URL to avoid memory leaks (only if it's a blob URL)
+    if (previews[fieldName] && previews[fieldName].startsWith('blob:')) {
       URL.revokeObjectURL(previews[fieldName]);
     }
 
     // Reset the file input
-    if (fieldName === 'favicon') faviconInputRef.current.value = null;
-    if (fieldName === 'logo') logoInputRef.current.value = null;
     if (fieldName === 'banner') bannerInputRef.current.value = null;
     if (fieldName === 'mobile_banner') mobileBannerInputRef.current.value = null;
 
@@ -449,6 +488,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     placeholder="enquiry.eledenthospitals.com"
                   />
                 </div>
+                
               </div>
 
               {/* Grid 2 Create Fields - Only show if form type is custom */}
@@ -516,82 +556,6 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
           {/* Image upload section */}
           <div className="mt-10 grid grid-cols-4 gap-4 mb-10">
-            {/* Favicon upload */}
-            <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Favicon</p>
-              <div className="flex flex-col">
-                {previews.favicon ? (
-                  <div className="relative mb-2">
-                    <img
-                      src={previews.favicon}
-                      alt="Favicon preview"
-                      className="w-32 h-32 object-contain border rounded"
-                    />
-                    <button
-                      onClick={() => handleRemoveImage('favicon')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => faviconInputRef.current.click()}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
-                  >
-                    <LuUpload className="font-bold" />
-                    Upload Document
-                  </button>
-                )}
-                <input
-                  type="file"
-                  ref={faviconInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'favicon')}
-                />
-              </div>
-            </div>
-
-            {/* Logo upload */}
-            <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Logo</p>
-              <div className="flex flex-col">
-                {previews.logo ? (
-                  <div className="relative mb-2">
-                    <img
-                      src={previews.logo}
-                      alt="Logo preview"
-                      className="w-32 h-32 object-contain border rounded"
-                    />
-                    <button
-                      onClick={() => handleRemoveImage('logo')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => logoInputRef.current.click()}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
-                  >
-                    <LuUpload className="font-bold" />
-                    Upload Document
-                  </button>
-                )}
-                <input
-                  type="file"
-                  ref={logoInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'logo')}
-                />
-              </div>
-            </div>
-
             {/* Banner upload */}
             <div>
               <p className="block text-sm font-medium text-gray-700 mb-2">Banner</p>
@@ -604,8 +568,10 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                       className="w-32 h-32 object-contain border rounded"
                     />
                     <button
+                      type="button"
                       onClick={() => handleRemoveImage('banner')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      disabled={uploadLoading.banner}
                     >
                       <X size={16} />
                     </button>
@@ -614,10 +580,15 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   <button
                     type="button"
                     onClick={() => bannerInputRef.current.click()}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2"
+                    disabled={uploadLoading.banner}
+                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
                   >
-                    <LuUpload className="font-bold" />
-                    Upload Document
+                    {uploadLoading.banner ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <LuUpload className="font-bold" />
+                    )}
+                    {uploadLoading.banner ? 'Uploading...' : 'Upload'}
                   </button>
                 )}
                 <input
@@ -625,7 +596,8 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   ref={bannerInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'banner')}
+                  onChange={(e) => handleImageUpload(e, 'banner')}
+                  disabled={uploadLoading.banner}
                 />
               </div>
             </div>
@@ -642,8 +614,10 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                       className="w-32 h-32 object-contain border rounded"
                     />
                     <button
+                      type="button"
                       onClick={() => handleRemoveImage('mobile_banner')}
-                      className="absolute -top-2 right-[35%] bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      disabled={uploadLoading.mobile_banner}
                     >
                       <X size={16} />
                     </button>
@@ -652,10 +626,15 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   <button
                     type="button"
                     onClick={() => mobileBannerInputRef.current.click()}
-                    className="flex items-center gap-2 text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 w-fit"
+                    disabled={uploadLoading.mobile_banner}
+                    className="flex items-center gap-2 text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 w-fit disabled:bg-rose-300 disabled:cursor-not-allowed"
                   >
-                    <LuUpload className="font-bold" />
-                    Upload Document
+                    {uploadLoading.mobile_banner ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <LuUpload className="font-bold" />
+                    )}
+                    {uploadLoading.mobile_banner ? 'Uploading...' : 'Upload'}
                   </button>
                 )}
                 <input
@@ -663,29 +642,12 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   ref={mobileBannerInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'mobile_banner')}
+                  onChange={(e) => handleImageUpload(e, 'mobile_banner')}
+                  disabled={uploadLoading.mobile_banner}
                 />
               </div>
             </div>
           </div>
-
-          {/* Navigation Buttons */}
-          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              Next
-            </button>
-          </div> */}
         </div>
       </div>
     </div>
