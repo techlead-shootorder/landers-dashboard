@@ -2,7 +2,7 @@
 
 import { InfoIcon } from "lucide-react";
 
-const ThankYou = ({formData, goToPrevStep}) => {
+const ThankYou = ({formData, goToPrevStep, pageId}) => {
 
     console.log("form DAta in thankyou", formData );
     // Visit landing page function
@@ -19,10 +19,8 @@ const ThankYou = ({formData, goToPrevStep}) => {
     };
 
     // Handle preview button click
-    const handlePrevious = () => {
-        console.log("Preview clicked");
-        // Add preview logic here
-        goToPrevStep()
+    const handlePreview = () => {
+        window.location.href = `https://landers.co.in/${formData.slug}`;
     };
 
     return (
@@ -73,10 +71,10 @@ const ThankYou = ({formData, goToPrevStep}) => {
                         {/* Action Buttons */}
                         <div className="flex justify-center gap-4 mt-8">
                             <button
-                                onClick={goToPrevStep}
+                                onClick={handlePreview}
                                 className="bg-red-500 hover:bg-red-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
                             >
-                                Previous
+                                Preview
                             </button>
                             <button
                                 onClick={handleEdit}

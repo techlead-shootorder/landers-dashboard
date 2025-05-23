@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { InfoIcon, Loader2 } from "lucide-react";
 import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
   // Local state for form handling with updated key names
@@ -20,6 +21,8 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const router = useRouter();
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -70,7 +73,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create landing page');
       }
-      toast.success('Page created Successfully')
+      toast.success('Page created Successfully! Redirecting....')
       return result;
     } catch (error) {
       toast.error('Error in Creating Page')
@@ -100,16 +103,21 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
       // Update parent form data with the response data
       const updatedFormData = {
         ...localFormData,
-        apiResponse: result.data, // Store full API response for later use
+        apiResponse: result.data.data, // Store full API response for later use
       };
       
       updateFormData(updatedFormData);
       
-      setSuccess('Landing page created successfully!');
+      setSuccess('Landing page created successfully! Redirecting......');
+
+      console.log("resuld response", result.data);
       
       // Small delay to show success message
       setTimeout(() => {
-        goToNextStep();
+        
+         router.push(`/create-page/${result.data.data.id}`);
+         
+        // goToNextStep();
       }, 1000);
 
     } catch (error) {
@@ -266,13 +274,13 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
           
           {/* Navigation Buttons */}
           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
-            <button
+            {/* <button
               type="button"
               disabled={isLoading}
               className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
-            </button>
+            </button> */}
             <button
               type="button"
               onClick={handleNext}
@@ -280,7 +288,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
               className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isLoading ? 'Creating...' : 'Next'}
+              {isLoading ? 'Creating...' : 'Create'}
             </button>
           </div>
         </div>
