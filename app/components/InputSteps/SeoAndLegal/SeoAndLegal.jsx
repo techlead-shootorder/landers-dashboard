@@ -160,35 +160,22 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                         </div>
 
                         {/* Fixed Navigation Bar at Bottom */}
-                        {/* <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-lg py-4 px-12 z-20">
-                            <div className="flex justify-between max-w-full">
-                                <div>
-                                    <button
-                                        onClick={visitLandingPage}
-                                        className="border border-gray-300 text-gray-700 px-8 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200"
-                                    >
-                                        Visit Landing Page
-                                    </button>
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={goToPrevStep}
-                                        className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
-                                    >
-                                        Previous
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleNext}
-                                        className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
-                            </div>
-                        </div> */}
+                        <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+                            <button
+                                type="button"
+                                onClick={goToPrevStep}
+                                className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleNext}
+                                className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

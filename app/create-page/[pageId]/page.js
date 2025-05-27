@@ -106,6 +106,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
 
                     />
                 );
@@ -116,6 +117,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 3:
@@ -125,6 +127,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 4:
@@ -134,6 +137,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 5:
@@ -143,6 +147,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 6:
@@ -153,6 +158,7 @@ const page = () => {
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
                         pageId={pageId}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 7:
@@ -162,6 +168,7 @@ const page = () => {
                         updateFormData={updateFormData}
                         goToNextStep={goToNextStep}
                         goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
                     />
                 );
             case 8:
@@ -206,14 +213,13 @@ const page = () => {
         }
     };
 
-    const handleNext = async () => {
-    console.log("formData, uploading after image upload", formData);
-    
-    const success = await handleUpdateData(formData);
-    if (success) {
-        goToNextStep();
-    }
-};
+    const handleUploadData = async () => {
+
+        const success = await handleUpdateData(formData);
+        if (success) {
+            goToNextStep();
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col relative">
@@ -226,7 +232,7 @@ const page = () => {
 
 
             {/* Navigation Buttons */}
-            <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+            {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
                 {currentStep != 1 && <button
                     type="button"
                     onClick={goToPrevStep}
@@ -240,16 +246,10 @@ const page = () => {
                     disabled={updateLoader}
                     className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
                 >
-                     {updateLoader ? <Loader2 className="w-4 h-4 animate-spin"  /> : "Save & Next" }
+                    {updateLoader ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save & Next"}
                 </button>
-                {/* <button
-              type="button"
-              onClick={() => handleUpdateData(formData)}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              SAVE
-            </button> */}
-            </div>
+                
+            </div> */}
 
         </div>
     )

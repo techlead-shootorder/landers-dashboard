@@ -2,9 +2,10 @@
 import { useState, useRef } from "react";
 import { InfoIcon, X, Loader2 } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
+import { toast } from 'react-hot-toast';
 import FieldCreationModal from './components/FieldCreationComponents'; // Adjust the path as needed
 
-const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
+const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUploadData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Add these state variables near your other useState declarations
@@ -32,6 +33,75 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
         `https://app.shootorder.com/assets/${formData.mobile_banner}` : 
         URL.createObjectURL(formData.mobile_banner)) : null,
   });
+
+  // Validation function
+  const validateForm = () => {
+    const errors = [];
+    
+    // Hero Section Validation
+    if (!formData.heading || formData.heading.trim() === '') {
+      errors.push('Heading is required');
+      toast.error('Heading is required');
+    }
+    
+    if (!formData.logo_link || formData.logo_link.trim() === '') {
+      errors.push('Logo Link is required');
+      toast.error('Logo Link is required');
+    }
+    
+    if (!formData.bar_offer || formData.bar_offer.trim() === '') {
+      errors.push('Bar Offer is required');
+      toast.error('Bar Offer is required');
+    }
+    
+    if (!formData.rating_profile_link || formData.rating_profile_link.trim() === '') {
+      errors.push('Rating Profile Link is required');
+      toast.error('Rating Profile Link is required');
+    }
+    
+    if (!formData.rating_site || formData.rating_site.trim() === '') {
+      errors.push('Rating Site is required');
+      toast.error('Rating Site is required');
+    }
+    
+    // Form Section Validation
+    const formType = formData.form_type || "default";
+    
+    if (formType === "custom") {
+      const customFields = formData.custom || [];
+      if (customFields.length < 3) {
+        errors.push('At least 3 custom fields are required for custom form type');
+        toast.error('At least 3 custom fields are required for custom form type');
+      }
+    }
+    
+    if (!formData.form_heading || formData.form_heading.trim() === '') {
+      errors.push('Form Heading is required');
+      toast.error('Form Heading is required');
+    }
+    
+    if (!formData.thank_you_heading || formData.thank_you_heading.trim() === '') {
+      errors.push('Thank you Heading is required');
+      toast.error('Thank you Heading is required');
+    }
+    
+    if (!formData.thank_you_description || formData.thank_you_description.trim() === '') {
+      errors.push('Thank you Description is required');
+      toast.error('Thank you Description is required');
+    }
+    
+    if (!formData.banner && !previews.banner) {
+      errors.push('Banner image is required - please upload a banner');
+      toast.error('Banner image is required - please upload a banner');
+    }
+    
+    if (!formData.mobile_banner && !previews.mobile_banner) {
+      errors.push('Mobile Banner image is required - please upload a mobile banner');
+      toast.error('Mobile Banner image is required - please upload a mobile banner');
+    }
+    
+    return errors;
+  };
 
   // Update your handleOpenModal function to reset editing state
   const handleOpenModal = () => {
@@ -158,12 +228,12 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
         [fieldName]: `https://app.shootorder.com/assets/${result?.data?.id}`,
       }));
 
-      // Success notification could be added here
-      console.log(`${fieldName} uploaded successfully`);
+      // Success notification
+      toast.success(`${fieldName === 'banner' ? 'Banner' : 'Mobile Banner'} uploaded successfully`);
 
     } catch (error) {
       console.error(`Error uploading ${fieldName}:`, error);
-      alert(`Failed to upload ${fieldName}. Please try again.`);
+      toast.error(`Failed to upload ${fieldName === 'banner' ? 'Banner' : 'Mobile Banner'}. Please try again.`);
     } finally {
       setUploadLoading(prev => ({
         ...prev,
@@ -206,10 +276,22 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
   };
 
-  // Handle next button click
+  // Handle next button click with validation
   const handleNext = () => {
-    // Go to next step
-    goToNextStep();
+    // Validate form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      // Errors are already shown via toast in validateForm function
+      return;
+    }
+
+    // If validation passes, show success and proceed
+    toast.success('Hero section configuration completed successfully!');
+    
+    // Small delay to show success message
+    setTimeout(() => {
+      handleUploadData();
+    }, 500);
   };
 
   // Handle previous button click
@@ -248,7 +330,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {/* Heading field */}
             <div>
               <label htmlFor="heading" className="block text-sm font-medium text-gray-700 mb-1">
-                Heading
+                Heading <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -280,7 +362,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {/* Logo Link field */}
             <div>
               <label htmlFor="logo_link" className="block text-sm font-medium text-gray-700 mb-1">
-                Logo Link
+                Logo Link <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -296,7 +378,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {/* Bar Offer field */}
             <div>
               <label htmlFor="bar_offer" className="block text-sm font-medium text-gray-700 mb-1">
-                Bar Offer
+                Bar Offer <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -312,7 +394,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {/* Rating Profile Link field */}
             <div>
               <label htmlFor="rating_profile_link" className="block text-sm font-medium text-gray-700 mb-1">
-                Rating Profile Link
+                Rating Profile Link <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -328,7 +410,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {/* Rating Site dropdown */}
             <div>
               <label htmlFor="rating_site" className="block text-sm font-medium text-gray-700 mb-1">
-                Rating Site
+                Rating Site <span className="text-red-500">*</span>
               </label>
               <select
                 id="rating_site"
@@ -434,7 +516,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 {/* Form Heading field */}
                 <div>
                   <label htmlFor="form_heading" className="block text-sm font-medium text-gray-700 mb-1">
-                    Form Heading
+                    Form Heading <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -466,7 +548,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 {/* Thank you Heading field */}
                 <div>
                   <label htmlFor="thank_you_heading" className="block text-sm font-medium text-gray-700 mb-1">
-                    Thank you Heading
+                    Thank you Heading <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -482,7 +564,7 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 {/* Thank you Description field */}
                 <div className="col-span-1">
                   <label htmlFor="thank_you_description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Thank you Description
+                    Thank you Description <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -501,6 +583,12 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
               <div>
                 {(formData.form_type || "default") === "custom" && (
                   <div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Fields <span className="text-red-500">*</span>
+                      </label>
+                      <p className="text-xs text-gray-500 mb-2">At least 3 custom fields are required</p>
+                    </div>
                     <button
                       onClick={handleOpenModal}
                       className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-md transition-colors duration-200"
@@ -511,7 +599,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     {/* Display the fields that have been created */}
                     {formData.custom && formData.custom.length > 0 && (
                       <div className="mt-4">
-                        <h3 className="text-sm font-medium text-gray-700 mb-2">Created Fields</h3>
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">
+                          Created Fields ({formData.custom.length}/3 minimum)
+                        </h3>
                         <div className="space-y-2">
                           {formData.custom.map((field, index) => (
                             <div
@@ -544,7 +634,23 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                             </div>
                           ))}
                         </div>
+                        {formData.custom.length < 3 && (
+                          <p className="text-xs text-red-500 mt-2">
+                            ⚠ You need {3 - formData.custom.length} more field(s) to meet the minimum requirement
+                          </p>
+                        )}
+                        {formData.custom.length >= 3 && (
+                          <p className="text-xs text-green-600 mt-2">
+                            ✓ Minimum custom fields requirement met
+                          </p>
+                        )}
                       </div>
+                    )}
+
+                    {(!formData.custom || formData.custom.length === 0) && (
+                      <p className="text-xs text-red-500 mt-2">
+                        Required: Please create at least 3 custom fields
+                      </p>
                     )}
 
                     {/* Add the modal component */}
@@ -564,7 +670,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
           <div className="mt-10 grid grid-cols-4 gap-4 mb-10">
             {/* Banner upload */}
             <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Banner</p>
+              <p className="block text-sm font-medium text-gray-700 mb-2">
+                Banner <span className="text-red-500">*</span>
+              </p>
               <div className="flex flex-col">
                 {previews.banner ? (
                   <div className="relative mb-2">
@@ -581,21 +689,25 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     >
                       <X size={16} />
                     </button>
+                    <p className="text-xs text-green-600 mt-2">✓ Banner uploaded successfully</p>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => bannerInputRef.current.click()}
-                    disabled={uploadLoading.banner}
-                    className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
-                  >
-                    {uploadLoading.banner ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <LuUpload className="font-bold" />
-                    )}
-                    {uploadLoading.banner ? 'Uploading...' : 'Upload'}
-                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => bannerInputRef.current.click()}
+                      disabled={uploadLoading.banner}
+                      className="flex items-center gap-2 w-fit text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 disabled:bg-rose-300 disabled:cursor-not-allowed"
+                    >
+                      {uploadLoading.banner ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <LuUpload className="font-bold" />
+                      )}
+                      {uploadLoading.banner ? 'Uploading...' : 'Upload'}
+                    </button>
+                    <p className="text-xs text-red-500">Required: Please upload a banner</p>
+                  </div>
                 )}
                 <input
                   type="file"
@@ -610,7 +722,9 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
             {/* Mobile Banner upload */}
             <div>
-              <p className="block text-sm font-medium text-gray-700 mb-2">Mobile Banner</p>
+              <p className="block text-sm font-medium text-gray-700 mb-2">
+                Mobile Banner <span className="text-red-500">*</span>
+              </p>
               <div className="flex flex-col">
                 {previews.mobile_banner ? (
                   <div className="relative mb-2">
@@ -627,21 +741,25 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                     >
                       <X size={16} />
                     </button>
+                    <p className="text-xs text-green-600 mt-2">✓ Mobile Banner uploaded successfully</p>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => mobileBannerInputRef.current.click()}
-                    disabled={uploadLoading.mobile_banner}
-                    className="flex items-center gap-2 text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 w-fit disabled:bg-rose-300 disabled:cursor-not-allowed"
-                  >
-                    {uploadLoading.mobile_banner ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <LuUpload className="font-bold" />
-                    )}
-                    {uploadLoading.mobile_banner ? 'Uploading...' : 'Upload'}
-                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => mobileBannerInputRef.current.click()}
+                      disabled={uploadLoading.mobile_banner}
+                      className="flex items-center gap-2 text-white px-4 py-2 rounded-md font-medium bg-rose-500 hover:bg-rose-600 cursor-pointer transition-colors duration-200 mb-2 w-fit disabled:bg-rose-300 disabled:cursor-not-allowed"
+                    >
+                      {uploadLoading.mobile_banner ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <LuUpload className="font-bold" />
+                      )}
+                      {uploadLoading.mobile_banner ? 'Uploading...' : 'Upload'}
+                    </button>
+                    <p className="text-xs text-red-500">Required: Please upload a mobile banner</p>
+                  </div>
                 )}
                 <input
                   type="file"
@@ -653,6 +771,24 @@ const HeroSectionStep = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                 />
               </div>
             </div>
+          </div>
+
+           {/* Navigation Buttons */}
+          <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

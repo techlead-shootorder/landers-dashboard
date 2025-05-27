@@ -4,14 +4,19 @@ import { useState } from "react";
 import { InfoIcon, Trash2, X } from "lucide-react";
 import TestimonialModal from "./components/TestimonialModal";
 import CTAModal from "./components/CTAModal";
+import { toast } from 'react-hot-toast';
 
-const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
+
+const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUploadData }) => {
   // State for modals
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
   const [isCtaModalOpen, setIsCtaModalOpen] = useState(false);
   
   // State for editing
   const [editingIndex, setEditingIndex] = useState(-1);
+  
+  // State for validation errors
+  const [validationErrors, setValidationErrors] = useState([]);
   
   // State for testimonial form
   const [testimonialFormData, setTestimonialFormData] = useState({
@@ -26,6 +31,100 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     Name: ""
   });
   
+  // Validation function
+  const validateForm = () => {
+    const errors = [];
+    
+    // 1. Heading is mandatory
+    if (!formData.testimonial_section_heading?.trim()) {
+      errors.push("Testimonial section heading is required");
+      toast.error("Testimonial section heading is required");
+    }
+    
+    // 2. Manual toggle validation
+    if (formData.testimonial_selector) {
+      // If manual is ON - at least 5 testimonials required
+      const testimonials = formData.testimonials || [];
+      if (testimonials.length < 5) {
+        errors.push("At least 5 testimonials are required when manual mode is enabled");
+         toast.error("At least 5 testimonials are required when manual mode is enabled");
+      }
+      
+      // Check each testimonial has required fields
+      testimonials.forEach((testimonial, index) => {
+        if (!testimonial.name?.trim()) {
+          errors.push(`Testimonial ${index + 1}: Name is required`);
+          toast.error(`Testimonial ${index + 1}: Name is required`);
+        }
+        if (!testimonial.testimonial?.trim()) {
+          errors.push(`Testimonial ${index + 1}: Testimonial text is required`);
+          toast.error(`Testimonial ${index + 1}: Testimonial text is required`);
+        }
+      });
+    } else {
+      // If manual is OFF - Google Place ID is mandatory
+      if (!formData.google_place_id?.trim()) {
+        errors.push("Google Place ID is required when automatic testimonials are enabled");
+        toast.error("Google Place ID is required when automatic testimonials are enabled");
+      }
+    }
+    
+    // 3. At least 1 CTA is mandatory
+    const ctas = formData.cta_selector || [];
+    if (ctas.length < 1) {
+      errors.push("At least 1 CTA (Call-to-Action) is required");
+      toast.error("At least 1 CTA (Call-to-Action) is required");
+    }
+    
+    // Check each CTA has required fields
+    ctas.forEach((cta, index) => {
+      if (!cta.cta?.trim()) {
+        errors.push(`CTA ${index + 1}: Action type is required`);
+         toast.error(`CTA ${index + 1}: Action type is required`);
+      }
+      if (!cta.Name?.trim()) {
+        errors.push(`CTA ${index + 1}: Name is required`);
+         toast.error(`CTA ${index + 1}: Name is required`);
+      }
+    });
+    
+    return errors;
+  };
+  
+  // Validate testimonial form before saving
+  const validateTestimonialForm = () => {
+    const errors = [];
+    
+    if (!testimonialFormData.name?.trim()) {
+      errors.push("Name is required");
+      toast.error("Name is required");
+    }
+    
+    if (!testimonialFormData.testimonial?.trim()) {
+      errors.push("Testimonial text is required");
+      toast.error("Testimonial text is required");
+    }
+    
+    return errors;
+  };
+  
+  // Validate CTA form before saving
+  const validateCtaForm = () => {
+    const errors = [];
+    
+    if (!ctaFormData.cta?.trim()) {
+      errors.push("CTA action type is required");
+      toast.error("CTA action type is required");
+    }
+    
+    if (!ctaFormData.Name?.trim()) {
+      errors.push("CTA name is required");
+      toast.error("CTA name is required");
+    }
+    
+    return errors;
+  };
+  
   // Toggle testimonial switch
   const toggleTestimonialSwitch = () => {
     const newSwitchState = !formData.testimonial_selector;
@@ -33,6 +132,9 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
       ...formData,
       testimonial_selector: newSwitchState
     });
+    
+    // Clear validation errors when switching modes
+    setValidationErrors([]);
   };
   
   // Handle input changes for form fields
@@ -42,6 +144,11 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
       ...formData,
       [name]: value
     });
+    
+    // Clear validation errors when user starts typing
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
   };
   
   // Handle testimonial modal input changes
@@ -93,8 +200,15 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     setEditingIndex(-1);
   };
   
-  // Save testimonial
+  // Save testimonial with validation
   const saveTestimonial = () => {
+    const testimonialErrors = validateTestimonialForm();
+    
+    if (testimonialErrors.length > 0) {
+      // alert(testimonialErrors.join('\n'));
+      return;
+    }
+    
     const newTestimonials = [...(formData.testimonials || [])];
     
     if (editingIndex >= 0) {
@@ -111,10 +225,22 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
     
     closeTestimonialModal();
+    
+    // Clear validation errors if they exist
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
   };
   
-  // Save CTA
+  // Save CTA with validation
   const saveCta = () => {
+    const ctaErrors = validateCtaForm();
+    
+    if (ctaErrors.length > 0) {
+      // toast.error(ctaErrors.join('\n'));
+      return;
+    }
+    
     const newCtas = [...(formData.cta_selector || [])];
     
     if (editingIndex >= 0) {
@@ -131,6 +257,11 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
     
     closeCtaModal();
+    
+    // Clear validation errors if they exist
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
   };
   
   // Edit testimonial
@@ -171,9 +302,22 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
     });
   };
 
-  const handleNext = () =>{
+  const handleNext = () => {
+    // Validate the entire form before proceeding
+    const errors = validateForm();
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    // Clear any existing errors
+    setValidationErrors([]);
+    
     // console.log("formData in testimonial", formData);
-    goToNextStep();
+    handleUploadData()
   }
 
   return (
@@ -197,6 +341,18 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
 
         {/* Main content area */}
         <div className="w-2/3 bg-white p-12 overflow-y-auto">
+          {/* Validation Errors Display */}
+          {/* {validationErrors.length > 0 && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+              <h4 className="text-red-800 font-medium mb-2">Please fix the following errors:</h4>
+              <ul className="list-disc list-inside text-red-700 text-sm space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          )} */}
+          
           {/* Testimonials Section */}
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-gray-800 mb-8">Testimonials</h2>
@@ -205,7 +361,7 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Heading
+                  Heading <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -213,8 +369,15 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   value={formData.testimonial_section_heading || ""}
                   onChange={handleInputChange}
                   placeholder="Elodent - Dental Implants Offer"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                  className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                    !formData.testimonial_section_heading?.trim() && validationErrors.length > 0
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                 />
+                {!formData.testimonial_section_heading?.trim() && validationErrors.length > 0 && (
+                  <p className="text-red-500 text-xs mt-1">This field is required</p>
+                )}
               </div>
               
               <div>
@@ -251,7 +414,7 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             {!formData.testimonial_selector ? (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Google Place Id
+                  Google Place Id <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -259,17 +422,42 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
                   value={formData.google_place_id || ""}
                   onChange={handleInputChange}
                   placeholder="Google Place Id"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                  className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                    !formData.google_place_id?.trim() && validationErrors.length > 0
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                 />
+                {!formData.google_place_id?.trim() && validationErrors.length > 0 && (
+                  <p className="text-red-500 text-xs mt-1">Google Place ID is required for automatic testimonials</p>
+                )}
               </div>
             ) : (
               <div className="mb-6">
-                <button
-                  onClick={openTestimonialModal}
-                  className="bg-rose-500 text-white px-4 py-2 rounded-md hover:bg-rose-600 transition"
-                >
-                  Create New
-                </button>
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={openTestimonialModal}
+                    className="bg-rose-500 text-white px-4 py-2 rounded-md hover:bg-rose-600 transition"
+                  >
+                    Create New
+                  </button>
+                  <div className="text-sm text-gray-600">
+                    {formData.testimonials?.length || 0} of 5 required testimonials
+                    {formData.testimonials?.length >= 5 && (
+                      <span className="text-green-600 ml-2">✓ Complete</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Show requirement warning */}
+                {formData.testimonials?.length < 5 && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p className="text-yellow-800 text-sm">
+                      <span className="font-medium">Note:</span> You need at least 5 testimonials in manual mode. 
+                      Currently you have {formData.testimonials?.length || 0} testimonial(s).
+                    </p>
+                  </div>
+                )}
               </div>
             )}
             
@@ -307,12 +495,29 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             
             {/* Create New CTA Button */}
             <div className="mb-6">
-              <button
-                onClick={openCtaModal}
-                className="bg-rose-500 text-white px-4 py-2 rounded-md hover:bg-rose-600 transition"
-              >
-                Create New
-              </button>
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={openCtaModal}
+                  className="bg-rose-500 text-white px-4 py-2 rounded-md hover:bg-rose-600 transition"
+                >
+                  Create New
+                </button>
+                <div className="text-sm text-gray-600">
+                  {formData.cta_selector?.length || 0} CTA(s) created
+                  {formData.cta_selector?.length >= 1 && (
+                    <span className="text-green-600 ml-2">✓ Complete</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Show requirement warning */}
+              {(!formData.cta_selector || formData.cta_selector.length === 0) && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-yellow-800 text-sm">
+                    <span className="font-medium">Required:</span> You need at least 1 CTA (Call-to-Action) button for your landing page.
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* CTA Display */}
@@ -351,7 +556,7 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
           </div>
 
           {/* Navigation Buttons */}
-          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+          <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={goToPrevStep}
@@ -366,7 +571,7 @@ const TestimonialsCTA = ({ formData, updateFormData, goToNextStep, goToPrevStep 
             >
               Next
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
       

@@ -257,7 +257,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
           </div>
 
           {/* Navigation Buttons */}
-          {/* <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
+          <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
               onClick={goToPrevStep}
@@ -272,14 +272,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
             >
               Next
             </button>
-            <button
-              type="button"
-              onClick={() => handleUpdateData(formData)}
-              className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              SAVE
-            </button>
-          </div> */}
+          </div>
         </div>
       </div>
 

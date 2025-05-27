@@ -91,10 +91,11 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
     });
   };
 
-  // Validate form data
+  // Enhanced validation function
   const validateForm = () => {
     const errors = [];
     
+    // Required field validations
     if (!localFormData.name.trim()) {
       errors.push('Name is required');
     }
@@ -107,6 +108,39 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
       errors.push('Email is required');
     } else if (!/\S+@\S+\.\S+/.test(localFormData.email)) {
       errors.push('Please enter a valid email address');
+    }
+
+    // Domain validation
+    if (!localFormData.domain.trim()) {
+      errors.push('Domain is required');
+    } else {
+      // Basic domain validation
+      const domainPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      if (!domainPattern.test(localFormData.domain)) {
+        errors.push('Please enter a valid domain (e.g., https://example.com)');
+      }
+    }
+
+    // Phone validation
+    if (!localFormData.phone.trim()) {
+      errors.push('Phone number is required');
+    } else {
+      // Basic phone validation (10+ digits)
+      const phonePattern = /^\d{10,}$/;
+      const cleanPhone = localFormData.phone.replace(/\D/g, '');
+      if (!phonePattern.test(cleanPhone)) {
+        errors.push('Please enter a valid phone number (at least 10 digits)');
+      }
+    }
+
+    // Address section heading validation
+    if (!localFormData.address_section_heading.trim()) {
+      errors.push('Address Section Heading is required');
+    }
+
+    // Address validation - at least one address required
+    if (!localFormData.addresses || localFormData.addresses.length === 0) {
+      errors.push('At least one address must be created');
     }
     
     return errors;
@@ -258,10 +292,10 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
               />
             </div>
             
-            {/* Domain field */}
+            {/* Domain field - Now Required */}
             <div>
               <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
-                Domain
+                Domain <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -272,6 +306,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 disabled={isLoading}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="https://example.com"
+                required
               />
             </div>
             
@@ -293,10 +328,10 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
               />
             </div>
             
-            {/* Phone field */}
+            {/* Phone field - Now Required */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
+                Phone <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -307,6 +342,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                 disabled={isLoading}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="1234567890"
+                required
               />
             </div>
             
@@ -333,10 +369,10 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
             <h3 className="text-xl font-semibold text-gray-800 mb-6">Address Section</h3>
             
             <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* Address Section Heading */}
+              {/* Address Section Heading - Now Required */}
               <div>
                 <label htmlFor="address_section_heading" className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Section Heading
+                  Address Section Heading <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -347,6 +383,7 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
                   disabled={isLoading}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Address Heading"
+                  required
                 />
               </div>
 
@@ -371,7 +408,9 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
             {/* Address list */}
             {(localFormData.addresses || []).length > 0 && (
               <div className="mt-4 mb-6">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Created Addresses</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  Created Addresses <span className="text-green-600">({(localFormData.addresses || []).length})</span>
+                </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {(localFormData.addresses || []).map((address, index) => (
                     <div
@@ -395,15 +434,18 @@ const BasicDetailsStep = ({ formData, updateFormData, goToNextStep }) => {
               </div>
             )}
 
-            {/* Create Address Button */}
+            {/* Create Address Button with required indicator */}
             <div className="mb-6">
               <button
                 className="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-md transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 onClick={() => handleOpenAddressModal()}
                 disabled={isLoading}
               >
-                Create Address
+                Create Address <span className="text-rose-200">*</span>
               </button>
+              <p className="text-sm text-gray-600 mt-2">
+                <span className="text-red-500">*</span> At least one address is required
+              </p>
             </div>
           </div>
           
