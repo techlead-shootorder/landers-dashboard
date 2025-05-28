@@ -1,8 +1,9 @@
 'use client';
 
 import { InfoIcon } from "lucide-react";
+import { toast } from "react-hot-toast"; // You'll need to install react-hot-toast
 
-const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) => {
+const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUploadData }) => {
     // Handle input changes for form fields
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -21,11 +22,38 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
         });
     };
 
-    // Handle next button click
+    // Validate required fields
+    const validateRequiredFields = () => {
+        const requiredFields = [
+            { field: 'seo_title', label: 'SEO Title' },
+            { field: 'seo_meta_description', label: 'SEO Meta Description' },
+            { field: 'copyright_text', label: 'Copyright Text' }
+        ];
+
+        const missingFields = [];
+
+        requiredFields.forEach(({ field, label }) => {
+            if (!formData[field] || formData[field].trim() === '') {
+                missingFields.push(label);
+            }
+        });
+
+        return missingFields;
+    };
+
+    // Handle next button click with validation
     const handleNext = () => {
-        // Go to next step
+        const missingFields = validateRequiredFields();
+        
+        if (missingFields.length > 0) {
+            // Show error toast with missing fields
+            toast.error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+            return;
+        }
+
+        // All validations passed
         console.log("formdata in seo", formData);
-        // goToNextStep();
+        handleUploadData();
     };
 
     // Visit landing page function
@@ -64,7 +92,7 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                         <div className="grid grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    SEO Title
+                                    SEO Title <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -72,13 +100,17 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                     value={formData.seo_title || ""}
                                     onChange={handleInputChange}
                                     placeholder="Elodent - Dental Implants Offer"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                    className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                        !formData.seo_title || formData.seo_title.trim() === ''
+                                            ? 'border-red-300 bg-red-50'
+                                            : 'border-gray-300'
+                                    }`}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    SEO Meta Description
+                                    SEO Meta Description <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -86,7 +118,11 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                     value={formData.seo_meta_description || ""}
                                     onChange={handleInputChange}
                                     placeholder="Elodent - Dental Implants Offer"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                    className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                        !formData.seo_meta_description || formData.seo_meta_description.trim() === ''
+                                            ? 'border-red-300 bg-red-50'
+                                            : 'border-gray-300'
+                                    }`}
                                 />
                             </div>
                         </div>
@@ -118,7 +154,7 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                         <div className="grid grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Copyright Text
+                                    Copyright Text <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -126,7 +162,11 @@ const SeoAndLegal = ({ formData, updateFormData, goToNextStep, goToPrevStep }) =
                                     value={formData.copyright_text || ""}
                                     onChange={handleInputChange}
                                     placeholder="© 2024 Company Name. All rights reserved."
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                    className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                        !formData.copyright_text || formData.copyright_text.trim() === ''
+                                            ? 'border-red-300 bg-red-50'
+                                            : 'border-gray-300'
+                                    }`}
                                 />
                             </div>
 

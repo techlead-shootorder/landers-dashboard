@@ -13,6 +13,7 @@ import TimelineStep from "../../components/InputSteps/Timeline/TimelineStep";
 import TestimonialsCTA from "../../components/InputSteps/Testimonials&CTA/TestimonialsCTA";
 import FaqAndInsta from "../../components/InputSteps/FAQ&Insta/FaqAndInsta";
 import SeoAndLegal from "../../components/InputSteps/SeoAndLegal/SeoAndLegal";
+import AddOn from "../../components/InputSteps/AddOn/AddOn";
 import ThankYou from "../../components/InputSteps/ThankYou/ThankYou";
 import { toast } from 'react-hot-toast';
 import { useParams } from 'next/navigation';
@@ -173,12 +174,24 @@ const page = () => {
                 );
             case 8:
                 return (
+                    <AddOn
+                        formData={formData}
+                        updateFormData={updateFormData}
+                        goToNextStep={goToNextStep}
+                        goToPrevStep={goToPrevStep}
+                        handleUploadData={handleUploadData}
+                        setCurrentStep={setCurrentStep}
+                    />
+                );
+            case 9:
+                return (
                     <ThankYou
                         formData={formData}
                         goToPrevStep={goToPrevStep}
                         pageId={pageId}
                     />
                 );
+
             default:
                 return <div>Step {currentStep} not implemented yet</div>;
         }
@@ -213,9 +226,13 @@ const page = () => {
         }
     };
 
-    const handleUploadData = async () => {
+    const handleUploadData = async (isAddOn = false) => {
 
         const success = await handleUpdateData(formData);
+        if(isAddOn){
+           
+            return success;
+        }
         if (success) {
             goToNextStep();
         }

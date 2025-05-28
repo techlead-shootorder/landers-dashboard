@@ -6,7 +6,7 @@ import FAQModal from "./component/FAQModal";
 import { toast } from 'react-hot-toast';
 
 
-const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pageId }) => {
+const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pageId, handleUploadData }) => {
   // State for modal
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
 
@@ -18,6 +18,40 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
 
   // State for editing
   const [editingIndex, setEditingIndex] = useState(-1);
+
+  // Validation function for main form
+  const validateMainForm = () => {
+    let isValid = true;
+    
+    if (!formData.faq_heading || formData.faq_heading.trim() === '') {
+      toast.error('FAQ heading is required');
+      isValid = false;
+    }
+    
+    if (!formData.faqs || formData.faqs.length < 3) {
+      toast.error('At least 3 FAQs are required to proceed');
+      isValid = false;
+    }
+    
+    return isValid;
+  };
+
+  // Validation function for FAQ modal
+  const validateFaqModal = () => {
+    let isValid = true;
+    
+    if (!faqFormData.question || faqFormData.question.trim() === '') {
+      toast.error('Question is required');
+      isValid = false;
+    }
+    
+    if (!faqFormData.answer || faqFormData.answer.trim() === '') {
+      toast.error('Answer is required');
+      isValid = false;
+    }
+    
+    return isValid;
+  };
 
   // Handle input changes for form fields
   const handleInputChange = (e) => {
@@ -52,16 +86,23 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
     setEditingIndex(-1);
   };
 
-  // Save FAQ
+  // Save FAQ with validation
   const saveFaq = () => {
+    // Validate FAQ modal form
+    if (!validateFaqModal()) {
+      return;
+    }
+
     const newFaqs = [...(formData.faqs || [])];
 
     if (editingIndex >= 0) {
       // Edit existing FAQ
       newFaqs[editingIndex] = { ...faqFormData };
+      toast.success('FAQ updated successfully!');
     } else {
       // Add new FAQ
       newFaqs.push({ ...faqFormData });
+      toast.success('FAQ created successfully!');
     }
 
     updateFormData({
@@ -89,11 +130,23 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
       ...formData,
       faqs: newFaqs
     });
+    toast.success('FAQ deleted successfully!');
   };
 
+  // Handle next button with validation
   function handleNext() {
-    // console.log("form data in faq", formData);
-    goToNextStep();
+    // Validate main form
+    if (!validateMainForm()) {
+      return;
+    }
+
+    // If validation passes, proceed to next step
+    toast.success('FAQ section completed successfully!');
+    
+    // Small delay to show success message
+    setTimeout(() => {
+      handleUploadData();
+    }, 500);
   }
 
   const handleUpdateData = async (state) => {
@@ -151,14 +204,14 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Heading
+                  Heading <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="faq_heading"
                   value={formData.faq_heading || ""}
                   onChange={handleInputChange}
-                  placeholder="Elodent - Dental Implants Offer"
+                  placeholder="Frequently Asked Questions"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
@@ -172,7 +225,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
                   name="faq_sub_heading"
                   value={formData.faq_sub_heading || ""}
                   onChange={handleInputChange}
-                  placeholder="Elodent - Dental Implants Offer"
+                  placeholder="Get answers to common questions"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
@@ -181,7 +234,12 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
 
           {/* FAQs Section */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-800 mb-6">FAQs</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              FAQs <span className="text-red-500">*</span>
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              You need to create at least 3 FAQs to proceed. Current count: {formData.faqs ? formData.faqs.length : 0}/3
+            </p>
 
             {/* FAQs Display */}
             {formData.faqs && formData.faqs.length > 0 && (
@@ -235,7 +293,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
                   name="social_heading"
                   value={formData.social_heading || ""}
                   onChange={handleInputChange}
-                  placeholder="Elodent - Dental Implants Offer"
+                  placeholder="Follow us on social media"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
@@ -249,7 +307,7 @@ const FaqAndInsta = ({ formData, updateFormData, goToNextStep, goToPrevStep, pag
                   name="insta_id"
                   value={formData.insta_id || ""}
                   onChange={handleInputChange}
-                  placeholder="Elodent - Dental Implants Offer"
+                  placeholder="@your_instagram_handle"
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>

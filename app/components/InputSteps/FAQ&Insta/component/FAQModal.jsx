@@ -1,11 +1,18 @@
 import { X } from "lucide-react";
 
-const FAQModal = ({ isFaqModalOpen, editingIndex, closeFaqModal, saveFaq, faqFormData, handleFaqFormChange }) => {
+const FAQModal = ({ 
+  isFaqModalOpen, 
+  editingIndex, 
+  closeFaqModal, 
+  saveFaq, 
+  faqFormData, 
+  handleFaqFormChange
+}) => {
   if (!isFaqModalOpen) return null;
   
   return (
     <div className="fixed inset-0 flex items-start justify-end z-50">
-       <div className=' bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
+      <div className='bg-black absolute top-0 left-0 w-full h-full opacity-70'></div>
       <div className="bg-[#121621] h-full overflow-y-auto shadow-xl w-full max-w-md transform transition-transform duration-500 ease-out translate-x-0">
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700 sticky top-0 bg-[#121621] z-10">
           <h3 className="text-lg font-medium text-white">
@@ -21,7 +28,9 @@ const FAQModal = ({ isFaqModalOpen, editingIndex, closeFaqModal, saveFaq, faqFor
         
         <div className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Question</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Question <span className="text-red-400">*</span>
+            </label>
             <input
               type="text"
               name="question"
@@ -33,7 +42,9 @@ const FAQModal = ({ isFaqModalOpen, editingIndex, closeFaqModal, saveFaq, faqFor
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Answer</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Answer <span className="text-red-400">*</span>
+            </label>
             <textarea
               name="answer"
               value={faqFormData.answer}
