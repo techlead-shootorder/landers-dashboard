@@ -5,7 +5,7 @@ import { InfoIcon, X, Trash2, Loader2 } from "lucide-react";
 import { LuUpload } from "react-icons/lu";
 import { toast } from 'react-hot-toast';
 
-const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentStep }) => {
+const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentStep, handleUploadData }) => {
   const fileInputRef = useRef(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
@@ -16,7 +16,7 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
     if (formData.id) {
       fetchGalleryImages();
     }
-  }, [formData.id]);
+  }, []);
 
   // Fetch gallery images from API
   const fetchGalleryImages = async () => {
@@ -73,11 +73,21 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
         directus_files_id: uploadResult?.data?.id,
       };
 
+      console.log("gallery Data", galleryData);
+
+      const galleryArray = [...galleryImages, galleryData];
+      setGalleryImages(galleryArray);
+      updateFormData({
+        ...formData,
+        gallery: galleryArray
+      })
+
       // Success notification
       toast.success('Gallery image uploaded successfully');
       
       // Refresh gallery images
-      await fetchGalleryImages();
+      // await fetchGalleryImages();
+      
       
       // Reset file input
       fileInputRef.current.value = null;
@@ -93,18 +103,24 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
   // Handle removing gallery image
   const handleRemoveImage = async (galleryId) => {
     try {
-      const response = await fetch(`/api/removeGalleryImage/${galleryId}`, {
-        method: 'DELETE',
-      });
+      // const response = await fetch(`/api/removeGalleryImage/${galleryId}`, {
+      //   method: 'DELETE',
+      // });
 
-      if (!response.ok) {
-        throw new Error('Failed to remove image');
-      }
+      // if (!response.ok) {
+      //   throw new Error('Failed to remove image');
+      // }
 
+      const galleryNewData = galleryImages.filter(item => item.directus_files_id != galleryId)
+      updateFormData({
+        ...formData,
+        gallery: galleryNewData
+      })
+
+      setGalleryImages(galleryNewData);
       toast.success('Image removed successfully');
       
       // Refresh gallery images
-      await fetchGalleryImages();
 
     } catch (error) {
       console.error('Error removing gallery image:', error);
@@ -146,6 +162,14 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
   const handlePrevious = () => {
     goToPrevStep();
   };
+
+  // Save the data and go back to add on screen
+  const handleSave = async () => {
+    const success = await handleUploadData(true);
+    // if (success) {
+    //   goBackToAddOn();
+    // }
+};
 
   return (
     <div className="flex flex-col h-[88vh]">
@@ -228,7 +252,7 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
                       />
                       <button
                         type="button"
-                        onClick={() => handleRemoveImage(image.id)}
+                        onClick={() => handleRemoveImage(image.directus_files_id)}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       >
                         <X size={16} />
@@ -241,10 +265,10 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
 
             {/* Gallery validation indicator */}
             <div className="mt-4">
-              <p className={`text-sm ${galleryImages.length > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {galleryImages.length > 0
+              <p className={`text-sm ${galleryImages.length > 3 ? 'text-green-600' : 'text-red-500'}`}>
+                {galleryImages.length > 3
                   ? `✓ ${galleryImages.length} image${galleryImages.length > 1 ? 's' : ''} added`
-                  : 'At least 1 image required'
+                  : 'At least 4 image required'
                 }
               </p>
             </div>
@@ -254,17 +278,17 @@ const GallerySection = ({ formData, updateFormData, goBackToAddOn, setCurrentSte
           <div className="fixed bottom-0 w-full left-0 right-0 bg-white py-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end mt-12 space-x-4">
             <button
               type="button"
-              onClick={handlePrevious}
+              onClick={goBackToAddOn}
               className="border border-rose-500 text-rose-500 px-8 py-2 rounded-md font-medium hover:bg-rose-50 transition-colors duration-200"
             >
-              Previous
+              Back
             </button>
             <button
               type="button"
-              onClick={handleNext}
+              onClick={handleSave}
               className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
             >
-              Next
+              Save
             </button>
           </div>
         </div>

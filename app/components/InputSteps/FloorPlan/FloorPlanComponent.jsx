@@ -6,12 +6,54 @@ import { toast } from "react-hot-toast";
 const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUploadData }) => {
     const [activeTab, setActiveTab] = useState(0);
     const [activeSubTab, setActiveSubTab] = useState(0);
+    const [validationErrors, setValidationErrors] = useState([]);
 
     // Initialize floor plan data if not exists
-    const floorPlanData = formData.floor_plan || {
-        fp_heading: '',
-        fp_summary: '',
-        fp_tabs: []
+    const floorPlanData = {
+        fp_heading: formData.fp_heading,
+        fp_summary: formData.fp_summary,
+        fp_tabs: formData.fp_tabs || []
+    };
+
+    // Validation function
+    const validateForm = () => {
+        const errors = [];
+        
+        // 1. FP Heading is mandatory
+        if (!floorPlanData.fp_heading?.trim()) {
+            errors.push("Floor Plan heading is required");
+            toast.error("Floor Plan heading is required");
+        }
+        
+        // 2. At least one main tab is required
+        if (!floorPlanData.fp_tabs || floorPlanData.fp_tabs.length === 0) {
+            errors.push("At least one main tab is required");
+            toast.error("At least one main tab is required");
+        } else {
+            // 3. Check each tab has required fields and at least one sub tab
+            floorPlanData.fp_tabs.forEach((tab, tabIndex) => {
+                if (!tab.fp_tab_name?.trim()) {
+                    errors.push(`Tab ${tabIndex + 1}: Tab name is required`);
+                    toast.error(`Tab ${tabIndex + 1}: Tab name is required`);
+                }
+                
+                // Each tab must have at least one sub tab
+                if (!tab.fp_sub_tabs || tab.fp_sub_tabs.length === 0) {
+                    errors.push(`Tab ${tabIndex + 1}: At least one sub tab is required`);
+                    toast.error(`Tab ${tabIndex + 1}: At least one sub tab is required`);
+                } else {
+                    // Check each sub tab has required fields
+                    tab.fp_sub_tabs.forEach((subTab, subTabIndex) => {
+                        if (!subTab.fp_subtab_heading?.trim()) {
+                            errors.push(`Tab ${tabIndex + 1}, Sub Tab ${subTabIndex + 1}: Sub tab heading is required`);
+                            toast.error(`Tab ${tabIndex + 1}, Sub Tab ${subTabIndex + 1}: Sub tab heading is required`);
+                        }
+                    });
+                }
+            });
+        }
+        
+        return errors;
     };
 
     const handleInputChange = (field, value) => {
@@ -22,8 +64,13 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
         
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
+
+        // Clear validation errors when user starts typing
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const handleTabChange = (tabIndex, field, value) => {
@@ -40,8 +87,13 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
+
+        // Clear validation errors when user starts typing
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const handleSubTabChange = (tabIndex, subTabIndex, field, value) => {
@@ -65,8 +117,13 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
+
+        // Clear validation errors when user starts typing
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const addNewTab = () => {
@@ -82,8 +139,13 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
+
+        // Clear validation errors when adding new tab
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const removeTab = (tabIndex) => {
@@ -95,7 +157,7 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
 
         if (activeTab >= updatedTabs.length && updatedTabs.length > 0) {
@@ -123,8 +185,13 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
+
+        // Clear validation errors when adding new sub tab
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const removeSubTab = (tabIndex, subTabIndex) => {
@@ -141,7 +208,7 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
     };
 
@@ -162,17 +229,29 @@ const FloorPlanComponent = ({ formData, updateFormData, goBackToAddOn, handleUpl
 
         updateFormData({
             ...formData,
-            floor_plan: updatedFloorPlan
+            ...updatedFloorPlan
         });
     };
 
-    // Example usage
-const handleSave = async () => {
-    const success = await handleUploadData(true);
-    if (success) {
-      goBackToAddOn()
-    }
-};
+    // Handle save with validation
+    const handleSave = async () => {
+        console.log("Testing form data in floor plans", formData);
+        
+        // Validate the entire form before proceeding
+        const errors = validateForm();
+        
+        if (errors.length > 0) {
+            setValidationErrors(errors);
+            // Scroll to top to show errors
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        
+        // Clear any existing errors
+        setValidationErrors([]);
+        
+        const success = await handleUploadData(true);
+    };
 
     return (
         <div className="flex flex-col h-[88vh]">
@@ -204,15 +283,22 @@ const handleSave = async () => {
                         <div className="grid grid-cols-2 gap-6 mb-8">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Fp Heading
+                                    Fp Heading <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={floorPlanData.fp_heading || ''}
                                     onChange={(e) => handleInputChange('fp_heading', e.target.value)}
                                     placeholder="Master Plan"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                    className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                        !floorPlanData.fp_heading?.trim() && validationErrors.length > 0
+                                            ? 'border-red-300 bg-red-50'
+                                            : 'border-gray-300'
+                                    }`}
                                 />
+                                {!floorPlanData.fp_heading?.trim() && validationErrors.length > 0 && (
+                                    <p className="text-red-500 text-xs mt-1">This field is required</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -241,17 +327,26 @@ const handleSave = async () => {
                                         <Plus className="w-4 h-4" />
                                         Create New
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200"
-                                    >
-                                        Reposition
-                                    </button>
+                                    <div className="text-sm text-gray-600 flex items-center">
+                                        {floorPlanData.fp_tabs?.length || 0} tab(s) created
+                                        {floorPlanData.fp_tabs?.length >= 1 && (
+                                            <span className="text-green-600 ml-2">✓</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Show requirement warning */}
+                            {(!floorPlanData.fp_tabs || floorPlanData.fp_tabs.length === 0) && (
+                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                    <p className="text-yellow-800 text-sm">
+                                        <span className="font-medium">Required:</span> You need at least one main tab with at least one sub tab.
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Tab Navigation */}
-                            {floorPlanData.fp_tabs.length > 0 && (
+                            {floorPlanData?.fp_tabs?.length > 0 && (
                                 <div className="flex gap-2 mb-6 border-b">
                                     {floorPlanData.fp_tabs.map((tab, index) => (
                                         <button
@@ -276,15 +371,22 @@ const handleSave = async () => {
                                     <div className="flex items-center gap-4">
                                         <div className="flex-1">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Tab Name
+                                                Tab Name <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={floorPlanData.fp_tabs[activeTab].fp_tab_name || ''}
                                                 onChange={(e) => handleTabChange(activeTab, 'fp_tab_name', e.target.value)}
                                                 placeholder="Enter tab name"
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                                className={`w-full px-4 py-3 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                                    !floorPlanData.fp_tabs[activeTab].fp_tab_name?.trim() && validationErrors.length > 0
+                                                        ? 'border-red-300 bg-red-50'
+                                                        : 'border-gray-300'
+                                                }`}
                                             />
+                                            {!floorPlanData.fp_tabs[activeTab].fp_tab_name?.trim() && validationErrors.length > 0 && (
+                                                <p className="text-red-500 text-xs mt-1">Tab name is required</p>
+                                            )}
                                         </div>
                                         <button
                                             type="button"
@@ -299,15 +401,32 @@ const handleSave = async () => {
                                     <div>
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-lg font-medium text-gray-800">Sub Tabs</h4>
-                                            <button
-                                                type="button"
-                                                onClick={() => addNewSubTab(activeTab)}
-                                                className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                                Add Sub Tab
-                                            </button>
+                                            <div className="flex items-center gap-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => addNewSubTab(activeTab)}
+                                                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                    Add Sub Tab
+                                                </button>
+                                                <div className="text-sm text-gray-600">
+                                                    {floorPlanData.fp_tabs[activeTab].fp_sub_tabs?.length || 0} sub tab(s)
+                                                    {floorPlanData.fp_tabs[activeTab].fp_sub_tabs?.length >= 1 && (
+                                                        <span className="text-green-600 ml-2">✓</span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        {/* Show sub tab requirement warning */}
+                                        {(!floorPlanData.fp_tabs[activeTab].fp_sub_tabs || floorPlanData.fp_tabs[activeTab].fp_sub_tabs.length === 0) && (
+                                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                                <p className="text-yellow-800 text-sm">
+                                                    <span className="font-medium">Required:</span> This tab needs at least one sub tab.
+                                                </p>
+                                            </div>
+                                        )}
 
                                         {floorPlanData.fp_tabs[activeTab].fp_sub_tabs?.map((subTab, subIndex) => (
                                             <div key={subIndex} className="border border-gray-200 rounded-lg p-4 mb-4">
@@ -325,15 +444,22 @@ const handleSave = async () => {
                                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Sub Tab Heading
+                                                            Sub Tab Heading <span className="text-red-500">*</span>
                                                         </label>
                                                         <input
                                                             type="text"
                                                             value={subTab.fp_subtab_heading || ''}
                                                             onChange={(e) => handleSubTabChange(activeTab, subIndex, 'fp_subtab_heading', e.target.value)}
                                                             placeholder="Enter heading"
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                                                            className={`w-full px-3 py-2 border rounded-md focus:ring-rose-500 focus:border-rose-500 ${
+                                                                !subTab.fp_subtab_heading?.trim() && validationErrors.length > 0
+                                                                    ? 'border-red-300 bg-red-50'
+                                                                    : 'border-gray-300'
+                                                            }`}
                                                         />
+                                                        {!subTab.fp_subtab_heading?.trim() && validationErrors.length > 0 && (
+                                                            <p className="text-red-500 text-xs mt-1">Sub tab heading is required</p>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">

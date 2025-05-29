@@ -26,34 +26,34 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
             stepNumber: 9,
             isNew: false
         },
-        {
-            id: 'timeline',
-            title: 'Timeline',
-            description: 'Show your company history, project milestones, or process steps in a timeline format.',
-            stepNumber: 9,
-            isNew: false
-        },
-        {
-            id: 'pricing',
-            title: 'Pricing',
-            description: 'Present your pricing plans and packages in an organized, easy-to-compare format.',
-            stepNumber: 9,
-            isNew: false
-        },
-        {
-            id: 'team',
-            title: 'Team',
-            description: 'Introduce your team members with photos, roles, and brief descriptions.',
-            stepNumber: 9,
-            isNew: false
-        },
-        {
-            id: 'location',
-            title: 'Location',
-            description: 'Show your business location with maps and contact information.',
-            stepNumber: 9,
-            isNew: false
-        }
+        // {
+        //     id: 'timeline',
+        //     title: 'Timeline',
+        //     description: 'Show your company history, project milestones, or process steps in a timeline format.',
+        //     stepNumber: 9,
+        //     isNew: false
+        // },
+        // {
+        //     id: 'pricing',
+        //     title: 'Pricing',
+        //     description: 'Present your pricing plans and packages in an organized, easy-to-compare format.',
+        //     stepNumber: 9,
+        //     isNew: false
+        // },
+        // {
+        //     id: 'team',
+        //     title: 'Team',
+        //     description: 'Introduce your team members with photos, roles, and brief descriptions.',
+        //     stepNumber: 9,
+        //     isNew: false
+        // },
+        // {
+        //     id: 'location',
+        //     title: 'Location',
+        //     description: 'Show your business location with maps and contact information.',
+        //     stepNumber: 9,
+        //     isNew: false
+        // }
     ];
 
     // Filter out sections that are already added
@@ -78,7 +78,7 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
         }
 
         const selectedAddOn = availableAddOns.find(addon => addon.id === selectedCard);
-        
+
         if (selectedAddOn) {
             // Update formData to include this new section
             const updatedFormData = {
@@ -111,10 +111,10 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
                 }
 
                 toast.success(`${selectedAddOn.title} section added successfully!`);
-                
+
                 // Navigate to the newly added section
                 insertAndNavigateToSection(selectedCard);
-                
+
             } catch (error) {
                 console.error("Error saving data:", error.message);
                 toast.error("Something went wrong while saving data");
@@ -133,12 +133,16 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
         setSelectedCard(null);
     };
 
+    const handleNext = () => {
+        goToNextStep();
+    }
+
     const availableCards = getAvailableAddOns();
 
     // Render different sections based on currentSection
     if (currentSection === 'floor_plan') {
         return (
-            <FloorPlanComponent 
+            <FloorPlanComponent
                 formData={formData}
                 updateFormData={updateFormData}
                 goBackToAddOn={goBackToAddOn}
@@ -149,7 +153,7 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
     }
     else if (currentSection === 'gallery') {
         return (
-            <GallerySection 
+            <GallerySection
                 formData={formData}
                 updateFormData={updateFormData}
                 goBackToAddOn={goBackToAddOn}
@@ -192,11 +196,10 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
                                 <div
                                     key={card.id}
                                     onClick={() => handleCardSelect(card.id)}
-                                    className={`relative bg-gray-100 rounded-lg p-6 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                                        selectedCard === card.id 
-                                            ? 'ring-2 ring-rose-500 bg-rose-50' 
+                                    className={`relative bg-gray-100 rounded-lg p-6 cursor-pointer transition-all duration-200 hover:shadow-md ${selectedCard === card.id
+                                            ? 'ring-2 ring-rose-500 bg-rose-50'
                                             : 'hover:bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     {/* New badge */}
                                     {card.isNew && (
@@ -237,7 +240,7 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
                         >
                             Previous
                         </button>
-                        <button
+                        {/* <button
                             type="button"
                             onClick={handleSkip}
                             className="border border-gray-400 text-gray-600 px-8 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200"
@@ -255,6 +258,13 @@ const AddOn = ({ formData, updateFormData, goToNextStep, goToPrevStep, handleUpl
                             }`}
                         >
                             {availableCards.length === 0 ? 'Continue' : 'Add'}
+                        </button> */}
+                        <button
+                            type="button"
+                            onClick={handleNext}
+                            className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-2 rounded-md font-medium transition-colors duration-200"
+                        >
+                            Next
                         </button>
                     </div>
                 </div>
